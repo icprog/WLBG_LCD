@@ -225,8 +225,11 @@ void Show_Font(u16 x,u16 y,u8 *font,u16 backcolor,u16 pointcolor,u8 size,u8 mode
 		}	
 		for(t1=0;t1<8;t1++)
 		{
-			if(temp&0x80)LCD_Fast_DrawPoint(x,y,pointcolor);
-			else if((mode==0)||(mode==2))LCD_Fast_DrawPoint(x,y,backcolor); 
+			if(temp&0x80){
+				LCD_Fast_DrawPoint(x,y,pointcolor);
+			}else if((mode==0)||(mode==2)){
+				LCD_Fast_DrawPoint(x,y,backcolor);
+			}				
 			temp<<=1;
 			y++;
 			if((y-y0)==size)

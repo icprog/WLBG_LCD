@@ -22,7 +22,7 @@ unsigned short  timeflag;
 unsigned short  Menu_Exit_Time;
 u8   AdrrOK_Flag;
 unsigned long Menu_Valid_Time = MENU_VALID_TIME;
-u8 slaveaddr = 3;
+// u8 slaveaddr = 3;
 //=============================================================================
 //函数名称: KEY_GPIO_Config
 //功能概要:LED灯引脚配置
@@ -111,7 +111,8 @@ void dispose_menu(void)
 	static u8 slavedisplay[4];
 	static u8 param_flash_flag = 0;
 	switch(Menu){
-	case MENU_RESERVE:break;
+	case MENU_RESERVE:
+			break;
 	case MENU_READPARAM: 
 		  slaveaddrtemp1 = AT24CXX_ReadOneByte(0x00);slaveaddrtemp2 = AT24CXX_ReadOneByte(0x01);
 	  	Show_Str(32,32*4,8*32,"修改前设备地址: ",BACK_COLOR,POINT_COLOR,32,0);

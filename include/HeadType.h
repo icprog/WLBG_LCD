@@ -7,7 +7,7 @@
 #include "usart.h"
 #include "led.h"
 #include "24cxx.h" 
-
+#include "can.h"
 /*************Typedef datatype start*******************/
 typedef char int8;
 typedef volatile char vint8;
@@ -176,15 +176,15 @@ typedef struct{
 }Communation_Send_Type;
 //主机接收响应协议字节
 typedef struct{
-	u8  frame_start;
-	u8  comm;
+	u8  frame_soh;
+	u8  frame_x;
 	u8  addr;
-	u8 lockH;
-	u8 lockL;
-  u8 lrcH;
-  u8 lrcL;
-	u8 frame_end1;
-	u8 frame_end2;
+	u8  funcode;
+	u8 datasizeH;
+	u8 datasizeL;
+	u8  x;
+	u8  y;
+	u8  recbuf[20];
 }Communation_Rec_Type;
 
 typedef union{
@@ -194,7 +194,7 @@ typedef union{
 
 typedef union{
 	Communation_Rec_Type control;
-	u8	rec_buf[9];	
+	u8	rec_buf[28];	
 }COMM_Rec_Union_Type;
 
 typedef struct{
@@ -295,6 +295,8 @@ void KEY_GPIO_Config(void);
 u16 switch_init_time(void);
 void dispose_key(void );
 void dispose_menu(void);
+u8  Execute_Host_Comm(void);
+void Communication_Process(void );
 
 void TIM2_Config(void );
 void TIM3_Config(void );

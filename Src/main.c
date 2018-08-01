@@ -43,6 +43,7 @@
 #include "lcd.h"
 #include "text.h"	
 #include "GUI.h"
+#include "FT6236.h"
 
 CRC_HandleTypeDef hcrc;
 /* Private function prototypes -----------------------------------------------*/
@@ -50,6 +51,7 @@ void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq);
 void MX_CRC_Init(void);
 void GUIDEMO_Main(void);
 extern void MainTask_test(void);
+void testLED(void);
 int main(void)
 {
   HAL_Init();
@@ -60,27 +62,46 @@ int main(void)
 	LED_GPIO_Config();
 	AT24CXX_Init();
 	KEY_GPIO_Config();
+	FT6236_Init();
 // 	GUI_Init();
 	TIM2_Config();
 	TIM4_Config();
 	TIM3_PWM_Init(2000,84-1);    	//42M/42=1M的计数频率，自动重装载为500，那么PWM频率为1M/500=2kHZ
 	USART1_Config();
-	TIM_SetTIM3Compare1(1000);
+ 	TIM_SetTIM3Compare1(2000);
 // 	MainTask_test();
 // 	GUIDEMO_Main();
   while (1)
   {
 		dispose_key();
+		if(TPR_Structure.TouchSta &TP_COORD_UD)		//触摸有按下
+		{
+			FT6236_Scan();							//读取触摸坐标
+		  TPR_Structure.TouchSta &= ~TP_COORD_UD;	//清标记
+// 		 	while((USART1->SR&0X40)==0);			//通过串口1打印触摸坐标到电脑上
+// 			printf("X坐标:\t%d\r\n",TPR_Structure.x[0]);
+// 			while((USART1->SR&0X40)==0);
+// 			printf("Y坐标:\t%d\r\n",TPR_Structure.y[0]);
+			Show_Str(0,0,32*6,(u8*)TPR_Structure.x[0],BACK_COLOR,POINT_COLOR,32,1);
+			Show_Str(0,64,32*6,(u8*)TPR_Structure.y[0],BACK_COLOR,POINT_COLOR,32,1);
+			delay_ms(1000);
+		}
 		if(Key_SetParamFlag == 0){
 // 			Communication_Process();
-		LCD_Clear(BLACK);
-	  delay_ms(1000);
-		POINT_COLOR = WHITE;
-		Show_Str(40,0,80*4,"东12区",BACK_COLOR,POINT_COLOR,80,0);
-		Show_Str(80,80,80*4," 住院 ",BACK_COLOR,POINT_COLOR,80,0);
-		POINT_COLOR = RED;
-		Show_Str(0,160,80*4,"(2096)袋",BACK_COLOR,POINT_COLOR,80,0);
-		delay_ms(1000);
+// 		LCD_Clear(BLACK);
+// 		delay_ms(100);
+// 		POINT_COLOR = WHITE;
+// 		Show_Str(0,0,80*4,"东",BACK_COLOR,POINT_COLOR,80,1);
+// 		Show_Str(80*1,0,80*4,"西",BACK_COLOR,BLUE,80,1);
+// 		Show_Str(80*2,0,80*4,"12",BACK_COLOR,YELLOW,80,1);
+// 		Show_Str(80*3,0,80*4,"区",BACK_COLOR,BROWN,80,1);
+// 		Show_Str(80,80,80*4," 住院 ",BACK_COLOR,GREEN,80,0);
+// 		POINT_COLOR = RED;
+// 		Show_Str(0,160,80*4,"(2096)",BACK_COLOR,LBBLUE,80,1);
+// 		Show_Str(80*3,160,80*4,"袋",BACK_COLOR,RED,80,1);
+// 		delay_ms(1000);
+// 		delay_ms(1000);
+// 		delay_ms(1000);
 		}else{
 			dispose_menu();
 		}
@@ -204,7 +225,69 @@ void RS485_start_send_byte(u16 send_count)
 	RS485_TEN();
 	HAL_UART_Transmit_IT(&huart1, &Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++], 1);
 }
-
+extern Menu_Option Menu;
+void testLED(void)
+{
+		static int testLED = 0;
+	 if(Menu == MENU_SETPARAM){
+    return ;
+	 }
+			if(Key_ScanNum == 0x01){
+				testLED++;
+				if(testLED > 7){
+					testLED = 0;
+				}
+				Key_ScanNum = 0;
+			}else if(Key_ScanNum == 0x11){
+				testLED--;
+				if(testLED < 0){
+					testLED = 7;
+				}	
+				Key_ScanNum = 0;				
+			}
+			switch(testLED){
+		  case 0:
+					RGB_GLED_OFF;
+					RGB_RLED_OFF;
+					RGB_BLED_OFF;
+				break;
+			case 1:
+					RGB_GLED_ON;
+					RGB_RLED_OFF;
+					RGB_BLED_OFF;
+				break;
+			case 2:
+					RGB_GLED_OFF;
+					RGB_RLED_ON;
+					RGB_BLED_OFF;
+				break;
+			case 3:
+					RGB_GLED_OFF;
+					RGB_RLED_OFF;
+					RGB_BLED_ON;
+				break;
+			case 4:
+					RGB_GLED_ON;
+					RGB_RLED_ON;
+					RGB_BLED_OFF;
+				break;
+			case 5:
+					RGB_GLED_ON;
+					RGB_RLED_OFF;
+					RGB_BLED_ON;
+				break;
+			case 6:
+					RGB_GLED_OFF;
+					RGB_RLED_ON;
+					RGB_BLED_ON;
+				break;
+			case 7:
+					RGB_GLED_ON;
+					RGB_RLED_ON;
+					RGB_BLED_ON;
+				break;
+		}
+}
 /******************* (C) COPYRIGHT 2015-2020 ????????? *****END OF FILE****/
 
 /**

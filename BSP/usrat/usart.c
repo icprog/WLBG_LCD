@@ -333,7 +333,7 @@ int fputc(int ch, FILE *f)
 //将Printf内容发往串口 
 //  USART_SendData(USART1, (unsigned char) ch);
 //  while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET); 
-//  return (ch);
+ return (ch);
 }
 //=============================================================================
 //函数名称:USART1_Putc
