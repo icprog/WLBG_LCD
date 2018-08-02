@@ -45,6 +45,7 @@
 #include "GUI.h"
 #include "FT6236.h"
 
+static u8 disbuf[4];
 CRC_HandleTypeDef hcrc;
 /* Private function prototypes -----------------------------------------------*/
 void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq);
@@ -82,8 +83,24 @@ int main(void)
 // 			printf("X×ø±ê:\t%d\r\n",TPR_Structure.x[0]);
 // 			while((USART1->SR&0X40)==0);
 // 			printf("Y×ø±ê:\t%d\r\n",TPR_Structure.y[0]);
-			Show_Str(0,0,32*6,(u8*)TPR_Structure.x[0],BACK_COLOR,POINT_COLOR,32,1);
-			Show_Str(0,64,32*6,(u8*)TPR_Structure.y[0],BACK_COLOR,POINT_COLOR,32,1);
+			if(TPR_Structure.x[0] != 0x000){
+				disbuf[1] = TPR_Structure.x[0]/100;
+				disbuf[3] = TPR_Structure.x[0]%100;
+				disbuf[0] = disbuf[1]/10 + '0';
+				disbuf[1] = disbuf[1]%10 + '0';
+				disbuf[2] = disbuf[3]/10 + '0';
+				disbuf[3] = disbuf[3]%10 + '0';
+				Show_Str(0,0,32*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,32,0);
+			}
+			if(TPR_Structure.y[0] != 0x0000){
+				disbuf[1] = TPR_Structure.y[0]/100;
+				disbuf[3] = TPR_Structure.y[0]%100;
+				disbuf[0] = disbuf[1]/10 + '0';
+				disbuf[1] = disbuf[1]%10 + '0';
+				disbuf[2] = disbuf[3]/10 + '0';
+				disbuf[3] = disbuf[3]%10 + '0';
+				Show_Str(0,64,32*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,32,0);
+			}
 			delay_ms(1000);
 		}
 		if(Key_SetParamFlag == 0){

@@ -1,10 +1,9 @@
 #ifndef __FT6236_H_
 #define __FT6236_H_
 #include "stm32f4xx_hal.h"
-#include"HeadType.h"
 
-#define FT6236_SCL       	GPIO_PIN_11  
-#define FT6236_SDA       	GPIO_PIN_10
+#define FT6236_SCL       	GPIO_PIN_10 
+#define FT6236_SDA       	GPIO_PIN_11
 #define FT6236_RST       	GPIO_PIN_3
 #define FT6236_SCL_PORT      	GPIOB
 #define FT6236_SDA_PORT     	GPIOB
@@ -30,9 +29,9 @@
 //触摸点相关数据结构体定义
 typedef struct			
 {
-	u8 TouchSta;	//触摸情况，b7:按下1/松开0; b6:0没有按键按下/1有按键按下;bit5:保留；bit4-bit0触摸点按下有效标志，有效为1，分别对应触摸点5-1；
-	u16 x[5];		//支持5点触摸，需要使用5组坐标存储触摸点数据
-	u16 y[5];
+	unsigned char TouchSta;	//触摸情况，b7:按下1/松开0; b6:0没有按键按下/1有按键按下;bit5:保留；bit4-bit0触摸点按下有效标志，有效为1，分别对应触摸点5-1；
+	unsigned short  x[5];		//支持5点触摸，需要使用5组坐标存储触摸点数据
+	unsigned short y[5];
 	
 }TouchPointRefTypeDef;
 extern TouchPointRefTypeDef TPR_Structure;
@@ -63,8 +62,8 @@ extern TouchPointRefTypeDef TPR_Structure;
 #define Chip_Vendor_ID          0xA3        //芯片ID(0x36)
 #define ID_G_FT6236ID			0xA8		//0x11
 
-u8 FT6236_WR_Reg(u16 reg,u8 *buf,u8 len);
-void FT6236_RD_Reg(u16 reg,u8 *buf,u8 len);
+unsigned char FT6236_WR_Reg(unsigned short reg,unsigned char  *buf,unsigned char  len);
+void FT6236_RD_Reg(unsigned short reg,unsigned char  *buf,unsigned char  len);
 void FT6236_Init(void);
 void FT6236_Scan(void);
 

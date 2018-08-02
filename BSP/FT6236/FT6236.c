@@ -13,18 +13,18 @@ void FT6236_INIT(void)
 
   /*Configure GPIO pins : PC2 PC3 */
 	GPIO_InitStruct.Pin=FT6236_SCL;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(FT6236_SCL_PORT,&GPIO_InitStruct);
 
 	GPIO_InitStruct.Pin=FT6236_SDA;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(FT6236_SDA_PORT,&GPIO_InitStruct);
 	
 	GPIO_InitStruct.Pin=FT6236_RST;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
+  GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
 	HAL_GPIO_Init(FT6236_RST_PORT,&GPIO_InitStruct);
 	
 	
@@ -36,9 +36,9 @@ void FT6236_INIT(void)
   HAL_NVIC_SetPriority(EXTI4_IRQn,2,0);       //抢占优先级为2，子优先级为0
   HAL_NVIC_EnableIRQ(EXTI4_IRQn);   
 		
-	FT6236_SCL_H;
-	FT6236_SDA_H;
-	FT6236_RST_H;
+// 	FT6236_SCL_H;
+// 	FT6236_SDA_H;
+// 	FT6236_RST_H;
 }
 
 /*******************************************************************************
@@ -50,13 +50,13 @@ void FT6236_INIT(void)
 void FT6236_SDA_OUT()
 {
 //   GPIO_InitTypeDef GPIO_InitStruct;	
-// 	__HAL_RCC_GPIOA_CLK_ENABLE();
+// 	__HAL_RCC_GPIOB_CLK_ENABLE();
 // 	
-// 	GPIO_InitStruct.Pin=I2C_SDA;
+// 	GPIO_InitStruct.Pin=FT6236_SDA;
 //   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-// 	HAL_GPIO_Init(GPIO_I2C,&GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(10*2));GPIOB->MODER|=1<<10*2;
+// 	HAL_GPIO_Init(FT6236_SDA_PORT,&GPIO_InitStruct);
+	GPIOB->MODER&=~(3<<(11*2));GPIOB->MODER|=1<<11*2;
 }
 
 /*******************************************************************************
@@ -68,14 +68,14 @@ void FT6236_SDA_OUT()
 void FT6236_SDA_IN(void)
 {
 // 	GPIO_InitTypeDef GPIO_InitStruct;	
-// 	__HAL_RCC_GPIOA_CLK_ENABLE();
+// 	__HAL_RCC_GPIOB_CLK_ENABLE();
 // 	
-// 	GPIO_InitStruct.Pin = I2C_SDA;
+// 	GPIO_InitStruct.Pin = FT6236_SDA;
 //   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 // 	GPIO_InitStruct.Pull = GPIO_PULLUP;
-// 	HAL_GPIO_Init(GPIO_I2C, &GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(10*2));GPIOB->MODER|=0<<10*2;
+// 	HAL_GPIO_Init(FT6236_SDA_PORT, &GPIO_InitStruct);
+	GPIOB->MODER&=~(3<<(11*2));GPIOB->MODER|=0<<11*2;
 }
 /****************************************************
 * 函数名称 ：
@@ -87,12 +87,11 @@ void FT6236_SDA_IN(void)
 void FT6236_Start(void)					
 {
 	FT6236_SDA_OUT();     		//sda线输出
-	delay_nus(3);
 	FT6236_SDA_H;									
 	FT6236_SCL_H;		//SCL最小高电平脉宽:0.6us
-	delay_nus(4);		//起始信号的最小建立时间:0.6us
+	delay_nus(5);		//起始信号的最小建立时间:0.6us
 	FT6236_SDA_L;		//SCL高电平期间，SDA的一个下降沿表示起始信号
-	delay_nus(4);		//起始信号的最小保持时间:0.6us
+	delay_nus(6);		//起始信号的最小保持时间:0.6us
 	FT6236_SCL_L;		//箝住总线,为发送器件地址做准备;
 	delay_nus(2);		//SCL最小低电平脉宽:1.2us,由RET实现
 }
@@ -107,13 +106,12 @@ void FT6236_Start(void)
 void FT6236_Stop(void)							
 {
 	FT6236_SDA_OUT();     		//sda线输出	
-	delay_nus(3);	
+	FT6236_SCL_L;
+  FT6236_SDA_L;
 	FT6236_SCL_H;		//SCL最小高电平脉宽:0.6us		
-	delay_nus(4);		//停止信号的最小建立时间:0.6us
-	FT6236_SDA_L;	
-	delay_nus(4);
+	delay_nus(6);		//停止信号的最小建立时间:0.6us
 	FT6236_SDA_H;		//SCL高电平期间，SDA的一个上升沿表示停止信号
-	delay_nus(2);						
+	delay_nus(6);						
 }
 
 /****************************************************
@@ -127,11 +125,10 @@ void FT6236_McuACK(void)
 {
 	FT6236_SCL_L;	
 	FT6236_SDA_OUT();     		//sda线输出	
-	delay_nus(3);
 	FT6236_SDA_L;	
 	delay_nus(2);																	
 	FT6236_SCL_H;		//SCL最小高电平脉宽:0.6us
-	delay_nus(2);
+	delay_nus(5);
 	FT6236_SCL_L;		//SCL最小低电平脉宽:1.2us
 }
 
@@ -146,11 +143,10 @@ void FT6236_McuNACK(void)
 {
 	FT6236_SCL_L;	
 	FT6236_SDA_OUT();     				//sda线输出	
-	delay_nus(3);
 	FT6236_SDA_H;	
 	delay_nus(2);																	
 	FT6236_SCL_H;				//SCL最小高电平脉宽:0.6us
-	delay_nus(2);
+	delay_nus(5);
 	FT6236_SCL_L;				//SCL最小低电平脉宽:1.2us
 }
 
@@ -277,13 +273,14 @@ void FT6236_RD_Reg(u16 reg,u8 *buf,u8 len)
  	FT6236_Start();  	 	   
 	FT6236_WrOneByte(FT_CMD_RD);   	//发送读命令		   
 	FT6236_CheckAck();	  
-	for(i=0;i<len;i++)
+	for(i=0;i<len - 1;i++)
 	{	   
 		*buf++ = FT6236_RdOneByte();		//读入1B数据到接收数据缓冲区中
 		FT6236_McuACK();					//发送应答位	  
 	} 
+	*buf = FT6236_RdOneByte();		//读入1B数据到接收数据缓冲区中
 	FT6236_McuNACK();						//n个字节读完,发送非应答位
-    FT6236_Stop();					//产生一个停止条件	  
+  FT6236_Stop();					//产生一个停止条件	  
 } 
 /* 
 **函数名：FT6236_Init
@@ -294,6 +291,7 @@ void FT6236_RD_Reg(u16 reg,u8 *buf,u8 len)
 void FT6236_Init(void)
 {
 	u8 temp; 
+	static u8 temp1[2]; 
 	FT6236_INIT();
 // 	/**********************PC6，中断INT*********************/
 // 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;				//PC6	
@@ -307,13 +305,15 @@ void FT6236_Init(void)
 	delay_nms(100);
 	FT6236_SDA_H;
 	FT6236_SCL_H;
-	delay_nms(10);
+	delay_nms(50);
 	temp=0;
 	FT6236_WR_Reg(FT_DEVIDE_MODE,&temp,1);	//进入正常操作模式 
  	temp=22;								//触摸有效值，22，越小越灵敏	
  	FT6236_WR_Reg(FT_ID_G_THGROUP,&temp,1);	//设置触摸有效值
  	temp=12;								//激活周期，不能小于12，最大14
- 	FT6236_WR_Reg(FT_ID_G_PERIODACTIVE,&temp,1); 
+ 	FT6236_WR_Reg(FT_ID_G_PERIODACTIVE,&temp,1);
+	delay_nms(20);	
+	FT6236_RD_Reg(FT_ID_G_LIB_VERSION,temp1,2);
 /******************************************************/
 }
 const u16 FT6236_TPX_TBL[5]=
