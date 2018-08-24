@@ -29,7 +29,7 @@
 #define AT24C128 16383
 #define AT24C256 32767
 
-#define EE_TYPE  AT24C02
+#define EE_TYPE  AT24C64
 
 void delay_nms(unsigned long nms);
 /* 声明全局函数 */

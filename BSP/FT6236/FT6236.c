@@ -28,13 +28,13 @@ void FT6236_INIT(void)
 	HAL_GPIO_Init(FT6236_RST_PORT,&GPIO_InitStruct);
 	
 	
-	GPIO_InitStruct.Pin=GPIO_PIN_4;                //PB4
+	GPIO_InitStruct.Pin=GPIO_PIN_1;                //PB1
 	GPIO_InitStruct.Mode=GPIO_MODE_IT_FALLING;      //上升沿触发
 	GPIO_InitStruct.Pull=GPIO_PULLUP;
 	HAL_GPIO_Init(GPIOB,&GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(EXTI4_IRQn,2,0);       //抢占优先级为2，子优先级为0
-  HAL_NVIC_EnableIRQ(EXTI4_IRQn);   
+  HAL_NVIC_SetPriority(EXTI1_IRQn,2,0);       //抢占优先级为2，子优先级为0
+  HAL_NVIC_EnableIRQ(EXTI1_IRQn);   
 		
 // 	FT6236_SCL_H;
 // 	FT6236_SDA_H;
@@ -56,7 +56,7 @@ void FT6236_SDA_OUT()
 //   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 // 	HAL_GPIO_Init(FT6236_SDA_PORT,&GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(11*2));GPIOB->MODER|=1<<11*2;
+	GPIOB->MODER&=~(3<<(15*2));GPIOB->MODER|=1<<(15*2);
 }
 
 /*******************************************************************************
@@ -75,7 +75,7 @@ void FT6236_SDA_IN(void)
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 // 	GPIO_InitStruct.Pull = GPIO_PULLUP;
 // 	HAL_GPIO_Init(FT6236_SDA_PORT, &GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(11*2));GPIOB->MODER|=0<<11*2;
+	GPIOB->MODER&=~(3<<(15*2));GPIOB->MODER|=0<<(15*2);
 }
 /****************************************************
 * 函数名称 ：
@@ -370,7 +370,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	delay_nus(10);  
 	switch(GPIO_Pin)
 	{
-			case GPIO_PIN_4:
+			case GPIO_PIN_1:
 			if(FT6236_INT_Read == 0)	{   	
 				TPR_Structure.TouchSta |= TP_COORD_UD;				//触摸坐标有更新
 			}

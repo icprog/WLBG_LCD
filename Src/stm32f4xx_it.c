@@ -190,9 +190,9 @@ void USART1_IRQHandler(void)
 			__HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_ORE);	
 	}
 }
-void EXTI4_IRQHandler(void)
+void EXTI1_IRQHandler(void)
 {
-    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_4);		//调用中断处理公用函数
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);		//调用中断处理公用函数
 }
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */

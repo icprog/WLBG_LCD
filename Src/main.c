@@ -90,7 +90,7 @@ int main(void)
 				disbuf[1] = disbuf[1]%10 + '0';
 				disbuf[2] = disbuf[3]/10 + '0';
 				disbuf[3] = disbuf[3]%10 + '0';
-				Show_Str(0,0,32*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,32,0);
+				Show_Str(0,0,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
 			}
 			if(TPR_Structure.y[0] != 0x0000){
 				disbuf[1] = TPR_Structure.y[0]/100;
@@ -99,14 +99,16 @@ int main(void)
 				disbuf[1] = disbuf[1]%10 + '0';
 				disbuf[2] = disbuf[3]/10 + '0';
 				disbuf[3] = disbuf[3]%10 + '0';
-				Show_Str(0,64,32*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,32,0);
+				Show_Str(0,64,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
 			}
 			delay_ms(1000);
 		}
 		if(Key_SetParamFlag == 0){
-// 			Communication_Process();
-// 		LCD_Clear(BLACK);
-// 		delay_ms(100);
+		Communication_Process();
+// 		LCD_Clear(RED);
+// 		delay_ms(1000);
+// 		LCD_Clear(WHITE);
+// 		delay_ms(1000);
 // 		POINT_COLOR = WHITE;
 // 		Show_Str(0,0,80*4,"¶«",BACK_COLOR,POINT_COLOR,80,1);
 // 		Show_Str(80*1,0,80*4,"Î÷",BACK_COLOR,BLUE,80,1);

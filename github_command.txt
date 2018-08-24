@@ -5,3 +5,4 @@
 5.git push origin test:mster                         //提交本地test分支作为远程的master分支
 6.git push origin test:test                          //提交本地test分支作为远程的test分支
 7.git push origin :test                              //刚提交的远程的test将被删除，但是本地还会保存
+8.git checkout . && git clean -xdf                   //删除本地修改的所有文件和目录

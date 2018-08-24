@@ -2,9 +2,9 @@
 #define __FT6236_H_
 #include "stm32f4xx_hal.h"
 
-#define FT6236_SCL       	GPIO_PIN_10 
-#define FT6236_SDA       	GPIO_PIN_11
-#define FT6236_RST       	GPIO_PIN_3
+#define FT6236_SCL       	GPIO_PIN_14 
+#define FT6236_SDA       	GPIO_PIN_15
+#define FT6236_RST       	GPIO_PIN_13
 #define FT6236_SCL_PORT      	GPIOB
 #define FT6236_SDA_PORT     	GPIOB
 #define FT6236_RST_PORT     	GPIOB
@@ -19,7 +19,7 @@
 #define FT6236_RST_L			HAL_GPIO_WritePin(FT6236_RST_PORT,FT6236_RST,GPIO_PIN_RESET)
 
 #define FT6236_SDA_Read 	HAL_GPIO_ReadPin(FT6236_SDA_PORT,FT6236_SDA)
-#define FT6236_INT_Read 	HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_4)
+#define FT6236_INT_Read 	HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_1)
 // #define SDA_IN()  {GPIOG->CRL&=0X0FFFFFFF;GPIOG->CRL|=0X40000000;}	 //输入模式，浮空输入模式
 // #define SDA_OUT() {GPIOG->CRL&=0X0FFFFFFF;GPIOG->CRL|=0X10000000;}	 //通用推挽输出，输出速度50MHZ
 

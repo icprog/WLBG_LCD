@@ -187,19 +187,33 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     HAL_NVIC_DisableIRQ(TIM4_IRQn);
   }
 } 
-
+extern void testLED(void);
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	static u8 key = 0;
 	if(htim->Instance==TIM2){
 		Led_Flash();
-		if(Menu_Valid_Time > 0){
-			key=Key_Scan();
-			if(key >0){
+		testLED();
+		key=Key_Scan();
+		if(key > 0){
+			if((key == 0xFF)&&(Menu_Valid_Time > 0)){
 				Key_ScanNum = key;
 				Menu_Valid_Time = MENU_VALID_TIME;
 				key = 0;
+			}else if((key == 0xFF)&&(Menu_Valid_Time == 0)){
+				key = 0;
+			}else{
+					Key_ScanNum = key;
+				  key = 0;
 			}
+		}
+		if(Menu_Valid_Time > 0){
+// 			key=Key_Scan();
+// 			if(key >0){
+// 				Key_ScanNum = key;
+// 				Menu_Valid_Time = MENU_VALID_TIME;
+// 				key = 0;
+// 			}
 			if(timeflag >0){
 					timeflag--;
 			}

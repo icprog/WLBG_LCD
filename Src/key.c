@@ -4,9 +4,9 @@
 #include "text.h"	
 #include "GUI.h"
 
-#define	DEVICE1_KEY1_IO					 GPIO_PIN_2
-#define	DEVICE1_KEY1_PORT				 GPIOA
-#define	DEVICE1_KEY2_IO					 GPIO_PIN_4
+#define	DEVICE1_KEY1_IO					 GPIO_PIN_4
+#define	DEVICE1_KEY1_PORT				 GPIOE
+#define	DEVICE1_KEY2_IO					 GPIO_PIN_5
 #define	DEVICE1_KEY2_PORT				 GPIOE
 #define READ_DEVICE1_KEY1    		 HAL_GPIO_ReadPin(DEVICE1_KEY1_PORT,DEVICE1_KEY1_IO)//返回的是一个字节，读的是一个位
 #define READ_DEVICE1_KEY2    		 HAL_GPIO_ReadPin(DEVICE1_KEY2_PORT,DEVICE1_KEY2_IO)//返回的是一个字节，读的是一个位
@@ -33,16 +33,12 @@ unsigned long Menu_Valid_Time = MENU_VALID_TIME;
 void KEY_GPIO_Config(void)
 {	
 	 GPIO_InitTypeDef  GPIO_InitStruct;
-	 __HAL_RCC_GPIOA_CLK_ENABLE();
 	 __HAL_RCC_GPIOE_CLK_ENABLE();
 	
-  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-	
-	GPIO_InitStruct.Pin = GPIO_PIN_4;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
 }
