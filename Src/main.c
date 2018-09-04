@@ -75,14 +75,18 @@ int main(void)
   while (1)
   {
 		dispose_key();
-		if(TPR_Structure.TouchSta &TP_COORD_UD)		//触摸有按下
+		if(TPR_Structure.TouchKey)		//触摸有按下
 		{
-			FT6236_Scan();							//读取触摸坐标
-		  TPR_Structure.TouchSta &= ~TP_COORD_UD;	//清标记
-// 		 	while((USART1->SR&0X40)==0);			//通过串口1打印触摸坐标到电脑上
-// 			printf("X坐标:\t%d\r\n",TPR_Structure.x[0]);
-// 			while((USART1->SR&0X40)==0);
-// 			printf("Y坐标:\t%d\r\n",TPR_Structure.y[0]);
+			if(TPR_Structure.TouchKey == TP_SHORT_Key){
+         POINT_COLOR = WHITE;
+				 TPR_Structure.TouchKey &= ~TP_SHORT_Key;
+			}else if(TPR_Structure.TouchKey == TP_LONG_Key){
+				POINT_COLOR = BLUE;
+				TPR_Structure.TouchKey &= ~TP_LONG_Key;
+			}else if(TPR_Structure.TouchKey == TP_LONGLONG_Key){
+				POINT_COLOR = RED;
+			}
+			Touch_Contact_Time = 0;
 			if(TPR_Structure.x[0] != 0x000){
 				disbuf[1] = TPR_Structure.x[0]/100;
 				disbuf[3] = TPR_Structure.x[0]%100;

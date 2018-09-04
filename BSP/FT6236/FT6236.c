@@ -1,6 +1,8 @@
 #include "FT6236.h"
 #include"HeadType.h"
 
+
+u32 Touch_Contact_Time = 0; 
 extern void delay_nus(u32 nus);
 
 
@@ -56,7 +58,8 @@ void FT6236_SDA_OUT()
 //   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 // 	HAL_GPIO_Init(FT6236_SDA_PORT,&GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(15*2));GPIOB->MODER|=1<<(15*2);
+	GPIOB->MODER&=~(3<<(15*2));
+	GPIOB->MODER|=1<<(15*2);
 }
 
 /*******************************************************************************
@@ -75,7 +78,8 @@ void FT6236_SDA_IN(void)
 //   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 // 	GPIO_InitStruct.Pull = GPIO_PULLUP;
 // 	HAL_GPIO_Init(FT6236_SDA_PORT, &GPIO_InitStruct);
-	GPIOB->MODER&=~(3<<(15*2));GPIOB->MODER|=0<<(15*2);
+	GPIOB->MODER&=~(3<<(15*2));
+	GPIOB->MODER|=0<<(15*2);
 }
 /****************************************************
 * 函数名称 ：
@@ -329,36 +333,40 @@ void FT6236_Scan(void)
 {
 	u8 i=0;
 	u8 sta = 0;
-	u8 buf[4] = {0};    
+	static u8 buf[4] = {0};  
+	static u8 gest_id = 0;
 	FT6236_RD_Reg(0x02,&sta,1);//读取触摸点的状态  	   
  	if(sta & 0x0f)	//判断是否有触摸点按下，0x02寄存器的低4位表示有效触点个数
  	{
  		TPR_Structure.TouchSta = ~(0xFF << (sta & 0x0F));	//~(0xFF << (sta & 0x0F))将点的个数转换为触摸点按下有效标志
- 		for(i=0;i<5;i++)	                                //分别判断触摸点1-5是否被按下
- 		{
- 			if(TPR_Structure.TouchSta & (1<<i))			    //读取触摸点坐标
- 			{											    //被按下则读取对应触摸点坐标数据
- 				FT6236_RD_Reg(FT6236_TPX_TBL[i],buf,4);	//读取XY坐标值
-				TPR_Structure.x[i]=((u16)(buf[0]&0X0F)<<8)+buf[1];
-				TPR_Structure.y[i]=((u16)(buf[2]&0X0F)<<8)+buf[3];
- 				if((buf[0]&0XC0)!=0X80)
- 				{
-					TPR_Structure.x[i]=TPR_Structure.y[i]=0;//必须是contact事件，才认为有效	
-					return;
-				}
- 			}
+		FT6236_RD_Reg(0x01,&gest_id,1);//读取触摸点的状态 
+		for(i=0;i<5;i++){	                                //分别判断触摸点1-5是否被按下
+				if(TPR_Structure.TouchSta & (1<<i)){			    //读取触摸点坐标,被按下则读取对应触摸点坐标数据
+					FT6236_RD_Reg(FT6236_TPX_TBL[i],buf,4);	//读取XY坐标值
+					TPR_Structure.x[i]=((u16)(buf[0]&0X0F)<<8)+buf[1];
+					TPR_Structure.y[i]=((u16)(buf[2]&0X0F)<<8)+buf[3];
+					if((buf[0]&0XC0)!=0X80){
+		 				TPR_Structure.x[i]=TPR_Structure.y[i]=0;//必须是contact事件，才认为有效	
+						return;
+					}
+			 }
  		}
  		TPR_Structure.TouchSta |= TP_PRES_DOWN;     //触摸按下标记
- 	}
- 	else
- 	{
- 		if(TPR_Structure.TouchSta &TP_PRES_DOWN) 	//之前是被按下的
- 			TPR_Structure.TouchSta &= ~0x80;        //触摸松开标记	
- 		else
- 		{
+ 	}	else{
+ 		if(TPR_Structure.TouchSta &TP_PRES_DOWN){ 	//之前是被按下的
+ 			TPR_Structure.TouchSta &= ~0x80;        //触摸松开标记
+			if((Touch_Contact_Time >= TOUCH_SHORT_TIME)&&(Touch_Contact_Time < TOUCH_LONG_TIME)){
+				TPR_Structure.TouchKey |= TP_SHORT_Key;
+			}else if((Touch_Contact_Time >= TOUCH_LONG_TIME)&&(Touch_Contact_Time < TOUCH_LONGLONG_TIME)){
+				TPR_Structure.TouchKey |= TP_LONG_Key;
+			}else{
+				TPR_Structure.TouchKey = 0x00;
+			}
+ 		}else{
  			TPR_Structure.x[0] = 0;
  			TPR_Structure.y[0] = 0;
- 			TPR_Structure.TouchSta &=0xe0;	//清楚触摸点有效标记
+ 			TPR_Structure.TouchSta &=0xe0;	//清除触摸点有效标记
+			TPR_Structure.TouchKey = 0x00;
  		}
  	}
 }

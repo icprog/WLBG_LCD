@@ -282,6 +282,7 @@ extern u8 slaveaddr;
 extern unsigned short  timeflag;
 extern unsigned short  Menu_Exit_Time;
 extern unsigned long Menu_Valid_Time;
+extern u32 Touch_Contact_Time; 
 /*************extern variable end*******************/
 
 /*************function start*******************/

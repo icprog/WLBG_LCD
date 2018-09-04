@@ -23,12 +23,19 @@
 // #define SDA_IN()  {GPIOG->CRL&=0X0FFFFFFF;GPIOG->CRL|=0X40000000;}	 //输入模式，浮空输入模式
 // #define SDA_OUT() {GPIOG->CRL&=0X0FFFFFFF;GPIOG->CRL|=0X10000000;}	 //通用推挽输出，输出速度50MHZ
 
+#define TOUCH_SHORT_TIME 		    30
+#define TOUCH_LONG_TIME			    300
+#define TOUCH_LONGLONG_TIME			1000
+
 #define TP_PRES_DOWN 0x80  //触屏被按下	
 #define TP_COORD_UD  0x40  //触摸坐标更新标记
-
+#define TP_SHORT_Key 0X01
+#define TP_LONG_Key 0X81
+#define TP_LONGLONG_Key 0Xc1
 //触摸点相关数据结构体定义
 typedef struct			
 {
+	unsigned char TouchKey;
 	unsigned char TouchSta;	//触摸情况，b7:按下1/松开0; b6:0没有按键按下/1有按键按下;bit5:保留；bit4-bit0触摸点按下有效标志，有效为1，分别对应触摸点5-1；
 	unsigned short  x[5];		//支持5点触摸，需要使用5组坐标存储触摸点数据
 	unsigned short y[5];

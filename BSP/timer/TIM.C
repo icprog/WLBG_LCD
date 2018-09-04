@@ -1,6 +1,6 @@
 #include"HeadType.h"
 #include "stm32f4xx_hal.h"
-
+#include "FT6236.h"
 #define ENABLE_PWM 1
 
 TIM_HandleTypeDef htim2;
@@ -224,6 +224,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}else{
 			Menu_Exit_Time = 0;
 	}
+	if(TPR_Structure.TouchSta &TP_COORD_UD){		//触摸有按下
+		if((TPR_Structure.TouchKey==0x00)||(TP_LONGLONG_Key == TPR_Structure.TouchKey)){
+			FT6236_Scan();							//读取触摸坐标
+		}
+		  TPR_Structure.TouchSta &= ~TP_COORD_UD;	//清标记
+		}
+	if(TPR_Structure.TouchSta &TP_PRES_DOWN){
+			if(TPR_Structure.TouchKey==0x00){
+				Touch_Contact_Time++;
+				if(Touch_Contact_Time > TOUCH_LONGLONG_TIME){
+					TPR_Structure.TouchKey |= TP_LONGLONG_Key;
+				}
+			}
+		}
   }else if(htim->Instance==TIM3){
 
   }else  if(htim->Instance==TIM4){

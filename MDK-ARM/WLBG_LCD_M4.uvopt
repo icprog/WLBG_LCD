@@ -187,7 +187,24 @@
           <WinNumber>2</WinNumber>
           <ItemText>TPR_Structure,0x10</ItemText>
         </Ww>
+        <Ww>
+          <count>1</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>testlong,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>2</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>testlfloat</ItemText>
+        </Ww>
       </WatchWindow2>
+      <MemoryWindow1>
+        <Mm>
+          <WinNumber>1</WinNumber>
+          <SubType>0</SubType>
+          <ItemText>\\WLBG_LCD_M4\../Src/main.c\testlfloat</ItemText>
+        </Mm>
+      </MemoryWindow1>
       <DebugFlag>
         <trace>0</trace>
         <periodic>1</periodic>
@@ -236,7 +253,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>352</TopLine>
+      <TopLine>354</TopLine>
       <CurrentLine>355</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.c</PathWithFileName>
@@ -412,7 +429,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>507</TopLine>
+      <TopLine>509</TopLine>
       <CurrentLine>510</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_gpio.c</PathWithFileName>
@@ -562,10 +579,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>3</ColumnNumber>
+      <ColumnNumber>18</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>111</TopLine>
-      <CurrentLine>108</CurrentLine>
+      <TopLine>69</TopLine>
+      <CurrentLine>80</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>../Src/main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -596,7 +613,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>192</TopLine>
+      <TopLine>194</TopLine>
       <CurrentLine>195</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\stm32f4xx_it.c</PathWithFileName>
@@ -676,7 +693,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>182</TopLine>
+      <TopLine>179</TopLine>
       <CurrentLine>190</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\CORE_m4\startup_stm32f407xx.s</PathWithFileName>
@@ -700,7 +717,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>2632</TopLine>
+      <TopLine>2634</TopLine>
       <CurrentLine>2635</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\LCD\lcd.c</PathWithFileName>
@@ -748,7 +765,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>207</TopLine>
+      <TopLine>209</TopLine>
       <CurrentLine>210</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\timer\TIM.C</PathWithFileName>
@@ -764,7 +781,7 @@
       <Focus>0</Focus>
       <ColumnNumber>14</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>36</TopLine>
+      <TopLine>38</TopLine>
       <CurrentLine>39</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\led\led.c</PathWithFileName>
@@ -844,8 +861,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>341</TopLine>
-      <CurrentLine>344</CurrentLine>
+      <TopLine>327</TopLine>
+      <CurrentLine>328</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\FT6236\FT6236.c</PathWithFileName>
       <FilenameWithoutPath>FT6236.c</FilenameWithoutPath>
@@ -884,7 +901,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>151</TopLine>
+      <TopLine>153</TopLine>
       <CurrentLine>154</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\STemWinLibrary522\Config\LCDConf_FlexColor_Template.c</PathWithFileName>
