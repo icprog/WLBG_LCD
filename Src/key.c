@@ -3,6 +3,7 @@
 #include "lcd.h"
 #include "text.h"	
 #include "GUI.h"
+#include "FT6236.h"
 
 #define	DEVICE1_KEY1_IO					 GPIO_PIN_4
 #define	DEVICE1_KEY1_PORT				 GPIOE
@@ -152,6 +153,7 @@ void dispose_menu(void)
 			slavedisplay[3] = '\0';
 			Show_Str(32*4,32*3,7*32,(u8 *)slavedisplay,BACK_COLOR,POINT_COLOR,32,0);
 			Key_ScanNum = 0;
+			TPR_Structure.TouchFlag = 0;
 			Menu_Exit_Time = MENU_EXIT_TIME;
 		}
 		if(timeflag == 0){

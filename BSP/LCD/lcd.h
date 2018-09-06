@@ -93,10 +93,10 @@ typedef struct
 //»­±ÊÑÕÉ«
 #define WHITE         	 0xFFFF
 #define BLACK         	 0x0000	  
-#define BLUE         	 0x001F  
+#define BLUE         	   0x001F  
 #define BRED             0XF81F
-#define GRED 			 0XFFE0
-#define GBLUE			 0X07FF
+#define GRED 			       0XFFE0
+#define GBLUE			       0X07FF
 #define RED           	 0xF800
 #define MAGENTA       	 0xF81F
 #define GREEN         	 0x07E0

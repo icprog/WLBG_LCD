@@ -45,6 +45,8 @@
 #include "GUI.h"
 #include "FT6236.h"
 
+int testTFT = 0;
+int OldtestTFT = 100;
 static u8 disbuf[4];
 CRC_HandleTypeDef hcrc;
 /* Private function prototypes -----------------------------------------------*/
@@ -53,6 +55,8 @@ void MX_CRC_Init(void);
 void GUIDEMO_Main(void);
 extern void MainTask_test(void);
 void testLED(void);
+void KeytestTFT(void);
+void TPR_Dispaly_Coordinate(void);
 int main(void)
 {
   HAL_Init();
@@ -75,38 +79,7 @@ int main(void)
   while (1)
   {
 		dispose_key();
-		if(TPR_Structure.TouchKey)		//触摸有按下
-		{
-			if(TPR_Structure.TouchKey == TP_SHORT_Key){
-         POINT_COLOR = WHITE;
-				 TPR_Structure.TouchKey &= ~TP_SHORT_Key;
-			}else if(TPR_Structure.TouchKey == TP_LONG_Key){
-				POINT_COLOR = BLUE;
-				TPR_Structure.TouchKey &= ~TP_LONG_Key;
-			}else if(TPR_Structure.TouchKey == TP_LONGLONG_Key){
-				POINT_COLOR = RED;
-			}
-			Touch_Contact_Time = 0;
-			if(TPR_Structure.x[0] != 0x000){
-				disbuf[1] = TPR_Structure.x[0]/100;
-				disbuf[3] = TPR_Structure.x[0]%100;
-				disbuf[0] = disbuf[1]/10 + '0';
-				disbuf[1] = disbuf[1]%10 + '0';
-				disbuf[2] = disbuf[3]/10 + '0';
-				disbuf[3] = disbuf[3]%10 + '0';
-				Show_Str(0,0,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
-			}
-			if(TPR_Structure.y[0] != 0x0000){
-				disbuf[1] = TPR_Structure.y[0]/100;
-				disbuf[3] = TPR_Structure.y[0]%100;
-				disbuf[0] = disbuf[1]/10 + '0';
-				disbuf[1] = disbuf[1]%10 + '0';
-				disbuf[2] = disbuf[3]/10 + '0';
-				disbuf[3] = disbuf[3]%10 + '0';
-				Show_Str(0,64,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
-			}
-			delay_ms(1000);
-		}
+// 		TPR_Dispaly_Coordinate();
 		if(Key_SetParamFlag == 0){
 		Communication_Process();
 // 		LCD_Clear(RED);
@@ -125,6 +98,7 @@ int main(void)
 // 		delay_ms(1000);
 // 		delay_ms(1000);
 // 		delay_ms(1000);
+			KeytestTFT();
 		}else{
 			dispose_menu();
 		}
@@ -173,7 +147,42 @@ void Stm32_Clock_Init(u32 plln,u32 pllm,u32 pllp,u32 pllq)
 		__HAL_FLASH_PREFETCH_BUFFER_ENABLE();  //使能flash预取
 	}
 }
+void TPR_Dispaly_Coordinate(void)
+{
+	if(TPR_Structure.TouchKey)		//触摸有按下
+		{
+			if(TPR_Structure.TouchKey == TP_SHORT_Key){
+         POINT_COLOR = WHITE;
+				 TPR_Structure.TouchKey &= ~TP_SHORT_Key;
+			}else if(TPR_Structure.TouchKey == TP_LONG_Key){
+				POINT_COLOR = BLUE;
+				TPR_Structure.TouchKey &= ~TP_LONG_Key;
+			}else if(TPR_Structure.TouchKey == TP_LONGLONG_Key){
+				POINT_COLOR = RED;
+			}
+			Touch_Contact_Time = 0;
+			if(TPR_Structure.x[0] != 0x000){
+				disbuf[1] = TPR_Structure.x[0]/100;
+				disbuf[3] = TPR_Structure.x[0]%100;
+				disbuf[0] = disbuf[1]/10 + '0';
+				disbuf[1] = disbuf[1]%10 + '0';
+				disbuf[2] = disbuf[3]/10 + '0';
+				disbuf[3] = disbuf[3]%10 + '0';
+				Show_Str(0,0,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
+			}
+			if(TPR_Structure.y[0] != 0x0000){
+				disbuf[1] = TPR_Structure.y[0]/100;
+				disbuf[3] = TPR_Structure.y[0]%100;
+				disbuf[0] = disbuf[1]/10 + '0';
+				disbuf[1] = disbuf[1]%10 + '0';
+				disbuf[2] = disbuf[3]/10 + '0';
+				disbuf[3] = disbuf[3]%10 + '0';
+				Show_Str(0,64,64*4,(u8*)disbuf,BACK_COLOR,POINT_COLOR,64,0);
+			}
+			delay_ms(1000);
+		}
 
+}
 
 
 /* USER CODE BEGIN 4 */
@@ -260,13 +269,23 @@ void testLED(void)
 				if(testLED > 7){
 					testLED = 0;
 				}
+				testTFT++;
+				if(testTFT > 7){
+					testTFT = 0;
+				}
 				Key_ScanNum = 0;
+				TPR_Structure.TouchFlag = 0;
 			}else if(Key_ScanNum == 0x11){
 				testLED--;
 				if(testLED < 0){
 					testLED = 7;
 				}	
-				Key_ScanNum = 0;				
+				testTFT--;
+				if(testTFT < 0){
+					testTFT = 7;
+				}	
+				Key_ScanNum = 0;
+				TPR_Structure.TouchFlag = 0;				
 			}
 			switch(testLED){
 		  case 0:
@@ -278,7 +297,7 @@ void testLED(void)
 					RGB_GLED_ON;
 					RGB_RLED_OFF;
 					RGB_BLED_OFF;
-				break;
+				break;				
 			case 2:
 					RGB_GLED_OFF;
 					RGB_RLED_ON;
@@ -310,6 +329,73 @@ void testLED(void)
 					RGB_BLED_ON;
 				break;
 		}
+}
+void KeytestTFT(void)
+{
+	 if(Menu == MENU_SETPARAM){
+    return ;
+	 }
+			if(testTFT == OldtestTFT){
+						return;
+			}
+	   switch(testTFT){
+					case 0:
+					LCD_Clear(BLACK);
+					Show_Str(0,80,80*4,"演示开始",BLACK,RED,80,1);
+					break;
+				case 1:
+					LCD_Clear(BLACK);
+					BACK_COLOR=WHITE;
+					Show_Str(0,0,80*4,"南",BLACK,WHITE,80,1);
+					Show_Str(80*1,0,80*4,"北",BLACK,WHITE,80,1);
+					Show_Str(80*2,0,80*4,"56",BLACK,WHITE,80,1);
+					Show_Str(80*3,0,80*4,"区",BLACK,WHITE,80,1);
+					Show_Str(0,80,80*4," 住院部 ",BLACK,WHITE,80,0);
+					Show_Str(0,160,80*4," 10268",BLACK,WHITE,80,1);
+					Show_Str(80*3,160,80*4,"袋",BLACK,WHITE,80,1);
+					break;
+				case 2:
+					LCD_Clear(RED);
+					BACK_COLOR=BLACK;
+					Show_Str(0,0,80*4,"东",BACK_COLOR,POINT_COLOR,80,1);
+					Show_Str(80*1,0,80*4,"西",BACK_COLOR,BLUE,80,1);
+					Show_Str(80*2,0,80*4,"12",BACK_COLOR,YELLOW,80,1);
+					Show_Str(80*3,0,80*4,"区",BACK_COLOR,BROWN,80,1);
+					Show_Str(80,80,80*4,"住院",BACK_COLOR,GREEN,80,0);
+					Show_Str(0,160,80*4,"(2096)",BACK_COLOR,LBBLUE,80,1);
+					Show_Str(80*3,160,80*4,"袋",BACK_COLOR,YELLOW,80,1);
+					break;
+				case 3:
+					LCD_Clear(BLUE);
+					Show_Str(0,0,80*4,"健麾集团",BACK_COLOR,POINT_COLOR,80,1);
+					Show_Str(0,80,80*4,"韦乐海茨",BACK_COLOR,GREEN,80,0);
+					Show_Str(0,160,80*4,"上海擅韬",BACK_COLOR,YELLOW,80,1);
+					break;
+				case 4:
+					LCD_Clear(LIGHTBLUE);
+					Show_Str(0,0+40,80*4,"背景演示",LIGHTBLUE,RED,80,1);
+				  Show_Str(0,80+40,80*4," 浅蓝色 ",LIGHTBLUE,RED,80,1);
+					break;
+				case 5:
+					LCD_Clear(YELLOW);
+					Show_Str(0,0+40,80*4,"背景演示",YELLOW,RED,80,1);
+				  Show_Str(0,80+40,80*4,"  黄色  ",YELLOW,RED,80,1);
+					break;
+				case 6:
+					LCD_Clear(LBBLUE);
+					Show_Str(0,0+40,80*4,"背景演示",LBBLUE,RED,80,1);
+				  Show_Str(0,80+40,80*4,"浅棕蓝色",LBBLUE,RED,80,1);
+					break;
+				case 7:
+					LCD_Clear(WHITE);
+				  Show_Str(0,0+40,80*4,"演示结束",WHITE,RED,80,1);
+				  Show_Str(0,80+40,80*4,"触摸循环",WHITE,RED,80,1);
+					break;
+				default: 
+					testTFT = 0;
+         break;
+			}
+			OldtestTFT = testTFT;
 }
 /******************* (C) COPYRIGHT 2015-2020 ????????? *****END OF FILE****/
 

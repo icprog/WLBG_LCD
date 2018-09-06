@@ -229,14 +229,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			FT6236_Scan();							//读取触摸坐标
 		}
 		  TPR_Structure.TouchSta &= ~TP_COORD_UD;	//清标记
-		}
+	}
 	if(TPR_Structure.TouchSta &TP_PRES_DOWN){
-			if(TPR_Structure.TouchKey==0x00){
+			if((TPR_Structure.TouchFlag == 0)&&(TPR_Structure.TouchKey==0x00)){
 				Touch_Contact_Time++;
 				if(Touch_Contact_Time > TOUCH_LONGLONG_TIME){
 					TPR_Structure.TouchKey |= TP_LONGLONG_Key;
 				}
 			}
+		}
+		if(TPR_Structure.TouchKey){
+			if((TPR_Structure.TouchKey == TP_LONGLONG_Key)&&(Menu_Valid_Time > 0)){
+				Key_ScanNum = 0xFF;
+				Menu_Valid_Time = MENU_VALID_TIME;
+				TPR_Structure.TouchKey = 0x00;
+			}else if((TPR_Structure.TouchKey == TP_LONGLONG_Key)&&(Menu_Valid_Time == 0)){
+				TPR_Structure.TouchKey = 0x00;
+			}else{
+					Key_ScanNum = TPR_Structure.TouchKey;
+				  TPR_Structure.TouchKey = 0x00;
+			}
+			TPR_Structure.TouchFlag = 1;
 		}
   }else if(htim->Instance==TIM3){
 

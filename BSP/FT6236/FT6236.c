@@ -362,11 +362,14 @@ void FT6236_Scan(void)
 			}else{
 				TPR_Structure.TouchKey = 0x00;
 			}
+			Touch_Contact_Time = 0;
+			TPR_Structure.TouchFlag = 0;
  		}else{
  			TPR_Structure.x[0] = 0;
  			TPR_Structure.y[0] = 0;
  			TPR_Structure.TouchSta &=0xe0;	//清除触摸点有效标记
 			TPR_Structure.TouchKey = 0x00;
+			TPR_Structure.TouchFlag = 0;
  		}
  	}
 }
