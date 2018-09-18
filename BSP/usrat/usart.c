@@ -15,11 +15,11 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 
-void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+void HAL_UART_MspInit(UART_HandleTypeDef *hsuart)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(huart->Instance==USART1)
+  if(hsuart->Instance==USART1)
   {
 
 		__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -34,7 +34,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
     GPIO_InitStruct.Pin = GPIO_PIN_10;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  }else if(huart->Instance==USART2){
+  }else if(hsuart->Instance==USART2){
 		__HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_USART2_CLK_ENABLE();
 
@@ -47,7 +47,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 
     GPIO_InitStruct.Pin = GPIO_PIN_3;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-	}else if(huart->Instance==USART3){
+	}else if(hsuart->Instance==USART3){
 		__HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_USART3_CLK_ENABLE();
 
@@ -63,21 +63,21 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 	}
 }
 
-void HAL_UART_MspDeInit(UART_HandleTypeDef *huart)
+void HAL_UART_MspDeInit(UART_HandleTypeDef *hsuart)
 {
 
-  if(huart->Instance==USART1)
+  if(hsuart->Instance==USART1)
   {
     __HAL_RCC_USART1_CLK_DISABLE();
     HAL_GPIO_DeInit(GPIOA,GPIO_PIN_9);
     HAL_GPIO_DeInit(GPIOA,GPIO_PIN_10);
     HAL_NVIC_DisableIRQ(USART1_IRQn);
-  }else if(huart->Instance==USART2){
+  }else if(hsuart->Instance==USART2){
     __HAL_RCC_USART2_CLK_DISABLE();
     HAL_GPIO_DeInit(GPIOA,GPIO_PIN_2);
     HAL_GPIO_DeInit(GPIOA,GPIO_PIN_3);
     HAL_NVIC_DisableIRQ(USART2_IRQn);
-	} else if(huart->Instance==USART3){
+	} else if(hsuart->Instance==USART3){
     __HAL_RCC_USART3_CLK_DISABLE();
     HAL_GPIO_DeInit(GPIOB,GPIO_PIN_10);
     HAL_GPIO_DeInit(GPIOB,GPIO_PIN_11);
@@ -598,8 +598,13 @@ void USART3_Do_Rx(u8 rxdata)
         return;
     }           
 }
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *husart)
+{
+	if(husart->Instance == USART1){
+		RS485_REN();
+	}
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *husart)
 {
 
 }

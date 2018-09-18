@@ -82,23 +82,7 @@ int main(void)
 // 		TPR_Dispaly_Coordinate();
 		if(Key_SetParamFlag == 0){
 		Communication_Process();
-// 		LCD_Clear(RED);
-// 		delay_ms(1000);
-// 		LCD_Clear(WHITE);
-// 		delay_ms(1000);
-// 		POINT_COLOR = WHITE;
-// 		Show_Str(0,0,80*4,"东",BACK_COLOR,POINT_COLOR,80,1);
-// 		Show_Str(80*1,0,80*4,"西",BACK_COLOR,BLUE,80,1);
-// 		Show_Str(80*2,0,80*4,"12",BACK_COLOR,YELLOW,80,1);
-// 		Show_Str(80*3,0,80*4,"区",BACK_COLOR,BROWN,80,1);
-// 		Show_Str(80,80,80*4," 住院 ",BACK_COLOR,GREEN,80,0);
-// 		POINT_COLOR = RED;
-// 		Show_Str(0,160,80*4,"(2096)",BACK_COLOR,LBBLUE,80,1);
-// 		Show_Str(80*3,160,80*4,"袋",BACK_COLOR,RED,80,1);
-// 		delay_ms(1000);
-// 		delay_ms(1000);
-// 		delay_ms(1000);
-			KeytestTFT();
+// 			KeytestTFT();
 		}else{
 			dispose_menu();
 		}
@@ -397,6 +381,8 @@ void KeytestTFT(void)
 			}
 			OldtestTFT = testTFT;
 }
+
+
 /******************* (C) COPYRIGHT 2015-2020 ????????? *****END OF FILE****/
 
 /**

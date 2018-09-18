@@ -703,7 +703,7 @@ HAL_StatusTypeDef HAL_USART_TransmitReceive(USART_HandleTypeDef *husart, uint8_t
   * @param  Size: Amount of data to be sent
   * @retval HAL status
   * @note   The USART errors are not managed to avoid the overrun error.
-  */
+  */																		
 HAL_StatusTypeDef HAL_USART_Transmit_IT(USART_HandleTypeDef *husart, uint8_t *pTxData, uint16_t Size)
 {
   if(husart->State == HAL_USART_STATE_READY)

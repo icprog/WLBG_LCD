@@ -211,33 +211,45 @@ void AT24CXX_Init(void)
 	  u8 addrtemp1,addrtemp2;
     I2C_INIT();		 //IIC初始化
     delay_nms(4);
-		if(0 == AT24CXX_Check()){
-				addrtemp1 = AT24CXX_ReadOneByte(0x00);
-			  addrtemp2 = AT24CXX_ReadOneByte(0x01);
-			  if((addrtemp1 == addrtemp2)&&(addrtemp1 < 128)){
-					slaveaddr = addrtemp1;
-					LCD_Clear(BLACK);
-					AdrrOK_Flag = 1;
-				}else{
-					Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
-					slaveaddr = 0;
-					delay_ms(1500);
-					delay_ms(1500);
-					
-					delay_ms(1500);
-				}
+	  if(True == Load_COMM_Template()){
+			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+			delay_ms(1500);
+			LCD_Clear(BLACK);
 		}else{
-					Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
-					Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
-					slaveaddr = 0;
-					delay_ms(1500);
-					delay_ms(1500);
-					delay_ms(1500);
+			Show_Str(32,32*1,8*32,"设备没有可用模板",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(16,32*2,9*32,"请先下载模板后使用",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(16,32*3,9*32,"最大可设模板数为64",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(32,32*4,8*32,"0<=模板编号<=63",BACK_COLOR,POINT_COLOR,32,0);
+			delay_ms(1500);
+			delay_ms(1500);
+			LCD_Clear(BLACK);
+		}
+		if(True == AT24CXX_Check()){
+					addrtemp1 = AT24CXX_ReadOneByte(0x00);
+					addrtemp2 = AT24CXX_ReadOneByte(0x01);
+					if((addrtemp1 == addrtemp2)&&(addrtemp1 < 128)){
+						slaveaddr = addrtemp1;
+						LCD_Clear(BLACK);
+						AdrrOK_Flag = 1;
+					}else{
+						Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
+						slaveaddr = 0;
+						delay_ms(1500);
+						delay_ms(1500);
+						delay_ms(1500);
+					}
+			}else{
+						Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
+						slaveaddr = 0;
+						delay_ms(1500);
+						delay_ms(1500);
+						delay_ms(1500);
 		}
 }
 
@@ -362,16 +374,16 @@ u8 AT24CXX_Check(void)
 {
 	u8 temp;
 
-	temp=AT24CXX_ReadOneByte(255);//避免每次开机都写AT24CXX		
+	temp=AT24CXX_ReadOneByte(15);//避免每次开机都写AT24CXX		
  	if(temp==0X55){
-		return 0;
+		return True;
 	}else//排除第一次初始化的情况
 	{
-		AT24CXX_WriteOneByte(255,0X55);
-	  temp=AT24CXX_ReadOneByte(255);	  
-		if(temp==0X55)return 0;
+		AT24CXX_WriteOneByte(15,0X55);
+	  temp=AT24CXX_ReadOneByte(15);	  
+		if(temp==0X55)return True;
 	}
-	return 1;											  
+	return False;											  
 }
 
 

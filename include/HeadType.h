@@ -84,7 +84,11 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 #define MENU_EXIT_TIME 			4000
 #define MENU_VALID_TIME			12000
 
-
+#define  TEMPLATE_COUNT_ADDR       30
+#define  TEMPLATE_SAVE_ADDR       32
+#define  TEMPLATE_SECTION_SIZE    32
+#define  TEMPLATE_SIZE    				22
+#define  DATADISPLAY_SIZE    			64
 #define  RS485_COM PAout(11)       
 #define  RS485_REN()	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_11,GPIO_PIN_RESET)
 #define  RS485_TEN()	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_11,GPIO_PIN_SET)
@@ -113,7 +117,7 @@ typedef union{
 /*************enum type start*******************/
 enum
 {
-	False=0,True
+	False=0,True=1,TTrue = 2
 };
 enum{
 	READLOW,READHIGH
@@ -185,7 +189,63 @@ typedef struct{
 	u8  x;
 	u8  y;
 	u8  recbuf[20];
+	u8  crc16_ccittH; 
+	u8  crc16_ccittL; 
+	u8  frame_end1;
+	u8  frame_end2;	
 }Communation_Rec_Type;
+typedef struct{
+	u8  frame_soh;
+	u8  frame_x;
+	u8  addr;
+	u8  funcode;
+	u8  template_no;
+	u8  datasizeH;
+	u8  datasizeL;
+	u8  word_size;
+	u8  display_size;
+	u8  display_mode;
+	u8  x_starH;
+	u8  x_starL;
+	u8  y_starH;
+	u8  y_starL;
+	u8  backcolorH;
+	u8  backcolorL;
+	u8  fontcolorH;
+	u8  fontcolorL;
+	u8  crc16_ccittH; 
+	u8  crc16_ccittL; 
+	u8  frame_end1;
+	u8  frame_end2;	
+}Communation_Rec_TemplateType;
+typedef struct{
+	u8  frame_soh;
+	u8  frame_x;
+	u8  addr;
+	u8  funcode;
+	u8  template_no;
+	u16  datasize;
+	u8  word_size;
+	u8  display_size;
+	u16  x_star;
+	u16  y_star;
+	u16  backcolorH;
+	u16  fontcolor;
+	u16  crc16_ccitt; 
+	u16  frame_end;	
+}display_TemplateType;
+typedef struct{
+	u8  frame_soh;
+	u8  frame_x;
+	u8  addr;
+	u8  funcode;
+	u8  template_no;
+	u16  datasize;
+  u8  dis_buf[DATADISPLAY_SIZE];
+	u16  crc16_ccitt; 
+	u8  frame_end1;
+	u8  frame_end2;	
+}Communation_Rec_DataType;
 
 typedef union{
 	Communation_Send_Type control;
@@ -193,9 +253,13 @@ typedef union{
 }COMM_Send_Union_Type;
 
 typedef union{
+	Communation_Rec_TemplateType rectemplate;
+	u8	rectemplate_buf[22];	
+}COMM_RecTemplate_Union_Type;
+typedef union{
 	Communation_Rec_Type control;
-	u8	rec_buf[28];	
-}COMM_Rec_Union_Type;
+	u8	rectemplate_buf[32];	
+}COMM_RecControl_Union_Type;
 
 typedef struct{
 	u8  answer_state;
@@ -258,10 +322,11 @@ extern  Usart_Type Usart1_Control_Data;
 extern Usart_Type Usart2_Control_Data;
 extern Usart_Type Usart3_Control_Data;
 extern  COMM_Send_Union_Type PC_Host_Rec;
-extern  COMM_Rec_Union_Type  PC_Hosr_Send;
+extern  COMM_RecTemplate_Union_Type  PC_Hosr_Send;
 
 extern  COMM_Send_Union_Type MCU_Host_Send;
-extern  COMM_Rec_Union_Type  MCU_Host_Rec;
+extern  COMM_RecTemplate_Union_Type  MCU_Host_RecT;
+extern COMM_RecControl_Union_Type  MCU_Host_RecC;
 
 extern  MCU_State_Type MCU_State;
 extern  Answer_Type 	 PC_Answer;
@@ -283,6 +348,9 @@ extern unsigned short  timeflag;
 extern unsigned short  Menu_Exit_Time;
 extern unsigned long Menu_Valid_Time;
 extern u32 Touch_Contact_Time; 
+extern COMM_RecTemplate_Union_Type Template_Save_buf[DATADISPLAY_SIZE];
+extern u8 new_display_flag;
+extern u8 new_display_num;
 /*************extern variable end*******************/
 
 /*************function start*******************/
@@ -298,6 +366,7 @@ void dispose_key(void );
 void dispose_menu(void);
 u8  Execute_Host_Comm(void);
 void Communication_Process(void );
+u8 Load_COMM_Template(void);
 
 void TIM2_Config(void );
 void TIM3_Config(void );

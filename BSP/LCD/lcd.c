@@ -2609,7 +2609,7 @@ void LCD_Init(void)
 		LCD_SSD_BackLightSet(100);//背光设置为最亮
 	}		 
 	LCD_Display_Dir(1);		//默认为竖屏
-//	LCD_Clear(WHITE);
+	LCD_Clear(BLACK);
 }  
 //清屏函数
 //color:要清屏的填充色

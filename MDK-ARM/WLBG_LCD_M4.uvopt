@@ -185,27 +185,12 @@
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>TPR_Structure,0x0A</ItemText>
+          <ItemText>Usart1_Control_Data,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>testlong,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>testlfloat</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>gest_id</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>buf</ItemText>
+          <ItemText>Template_Save_buf</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>
@@ -533,10 +518,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>57</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>787</TopLine>
+      <CurrentLine>788</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_uart.c</PathWithFileName>
       <FilenameWithoutPath>stm32f4xx_hal_uart.c</FilenameWithoutPath>
@@ -549,10 +534,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>59</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>706</TopLine>
+      <CurrentLine>707</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_usart.c</PathWithFileName>
       <FilenameWithoutPath>stm32f4xx_hal_usart.c</FilenameWithoutPath>
@@ -589,10 +574,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>10</ColumnNumber>
+      <ColumnNumber>16</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>67</TopLine>
-      <CurrentLine>70</CurrentLine>
+      <TopLine>78</TopLine>
+      <CurrentLine>84</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>../Src/main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -621,10 +606,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>47</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>194</TopLine>
-      <CurrentLine>195</CurrentLine>
+      <TopLine>184</TopLine>
+      <CurrentLine>187</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\stm32f4xx_it.c</PathWithFileName>
       <FilenameWithoutPath>stm32f4xx_it.c</FilenameWithoutPath>
@@ -637,10 +622,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>16</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>246</TopLine>
-      <CurrentLine>254</CurrentLine>
+      <TopLine>243</TopLine>
+      <CurrentLine>250</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\communication.c</PathWithFileName>
       <FilenameWithoutPath>communication.c</FilenameWithoutPath>
@@ -727,7 +712,7 @@
       <Focus>0</Focus>
       <ColumnNumber>4</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
+      <TopLine>6</TopLine>
       <CurrentLine>7</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\LCD\lcd.c</PathWithFileName>
@@ -743,7 +728,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>250</TopLine>
+      <TopLine>247</TopLine>
       <CurrentLine>251</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\text\text.c</PathWithFileName>
@@ -757,10 +742,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>1</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>1</CurrentLine>
+      <TopLine>280</TopLine>
+      <CurrentLine>281</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\usrat\usart.c</PathWithFileName>
       <FilenameWithoutPath>usart.c</FilenameWithoutPath>
@@ -773,10 +758,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>16</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>193</TopLine>
-      <CurrentLine>197</CurrentLine>
+      <TopLine>197</TopLine>
+      <CurrentLine>198</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\timer\TIM.C</PathWithFileName>
       <FilenameWithoutPath>TIM.C</FilenameWithoutPath>
@@ -821,10 +806,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>26</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>142</TopLine>
-      <CurrentLine>7</CurrentLine>
+      <TopLine>188</TopLine>
+      <CurrentLine>194</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\key.c</PathWithFileName>
       <FilenameWithoutPath>key.c</FilenameWithoutPath>
@@ -837,10 +822,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>6</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>1</CurrentLine>
+      <TopLine>390</TopLine>
+      <CurrentLine>403</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\Src\24cxx.c</PathWithFileName>
       <FilenameWithoutPath>24cxx.c</FilenameWithoutPath>
@@ -855,8 +840,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>18</TopLine>
-      <CurrentLine>19</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\can\can.c</PathWithFileName>
       <FilenameWithoutPath>can.c</FilenameWithoutPath>
@@ -869,10 +854,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>9</ColumnNumber>
+      <ColumnNumber>6</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>304</TopLine>
-      <CurrentLine>315</CurrentLine>
+      <TopLine>314</TopLine>
+      <CurrentLine>321</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\FT6236\FT6236.c</PathWithFileName>
       <FilenameWithoutPath>FT6236.c</FilenameWithoutPath>
@@ -967,8 +952,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>1</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\STemWinLibrary522\Demo\GUIDEMO.c</PathWithFileName>
       <FilenameWithoutPath>GUIDEMO.c</FilenameWithoutPath>
@@ -1523,7 +1508,7 @@
 
   <Group>
     <GroupName>remark</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1533,10 +1518,10 @@
       <FileType>5</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>54</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>55</TopLine>
+      <CurrentLine>67</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\调试备注.txt</PathWithFileName>
       <FilenameWithoutPath>调试备注.txt</FilenameWithoutPath>
@@ -1549,10 +1534,10 @@
       <FileType>5</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>49</ColumnNumber>
+      <ColumnNumber>62</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>1</TopLine>
-      <CurrentLine>6</CurrentLine>
+      <TopLine>16</TopLine>
+      <CurrentLine>42</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\设计思路笔记.txt</PathWithFileName>
       <FilenameWithoutPath>设计思路笔记.txt</FilenameWithoutPath>
