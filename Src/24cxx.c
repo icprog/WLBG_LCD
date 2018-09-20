@@ -209,10 +209,17 @@ u8 I2C_Read_Byte(u8 ack)
 void AT24CXX_Init(void)
 {
 	  u8 addrtemp1,addrtemp2;
+	  static u8 load_ok_flag = 0;
     I2C_INIT();		 //IIC初始化
     delay_nms(4);
 	  if(True == Load_COMM_Template()){
 			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+			if(True == Load_COMM_Default()){
+					Show_Str(16,32*3,32*9,"默认数据已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+				  load_ok_flag = 1;
+			}else{
+					Show_Str(16,32*3,32*9,"无默认数据,请下载",BACK_COLOR,POINT_COLOR,32,0);
+			}
 			delay_ms(1500);
 			LCD_Clear(BLACK);
 		}else{
@@ -251,6 +258,12 @@ void AT24CXX_Init(void)
 						delay_ms(1500);
 						delay_ms(1500);
 		}
+		if((load_ok_flag == 1)&&(AdrrOK_Flag == 1)){
+			LCD_Clear(LGRAY);
+			Display_Default_Data();
+			load_ok_flag = 0;
+		}
+		
 }
 
 /*******************************************************************************

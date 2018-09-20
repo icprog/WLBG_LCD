@@ -204,7 +204,7 @@ void Show_Font(u16 x,u16 y,u8 *font,u16 backcolor,u16 pointcolor,u8 size,u8 mode
 	for(i=0;i<128;i++ ){
       dzk[i]=0;
 	}
-	if(size!=12&&size!=16&&size!=24&&size!=32&&size!=64&&size!=80)return;	//不支持的size
+	if(size!=12&&size!=16&&size!=24&&size!=32&&size!=48&&size!=64&&size!=80)return;	//不支持的size
 	if((GTXXX == GT30L32S4W)&&(size<=32)){
 		Get_HzMat(font,dzk,size);	//得到相应大小的点阵数据 
 	}else if(GTXXX == GT60L16M2K4){
@@ -361,7 +361,7 @@ void Show_Ascchar(u16 y,u16 x,u8 Ascchar,u16 backcolor,u16 pointcolor,u8 size,u8
 	for(i=0;i<128;i++ ){
       dzk[i]=0;
 	}
-	if(size!=12&&size!=16&&size!=24&&size!=32&&size!=64&&size!=80)return;	//不支持的size
+	if(size!=12&&size!=16&&size!=24&&size!=32&&size!=48&&size!=64&&size!=80)return;	//不支持的size
 	if((GTXXX == GT30L32S4W)&&(size<=32)){
 		Get_AscMat(&Ascchar,dzk,size);	//得到相应大小的点阵数据 
 	}else if(GTXXX == GT60L16M2K4){

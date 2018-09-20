@@ -84,11 +84,16 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 #define MENU_EXIT_TIME 			4000
 #define MENU_VALID_TIME			12000
 
-#define  TEMPLATE_COUNT_ADDR       30
+#define  TEMPLATE_COUNT_ADDR      30
 #define  TEMPLATE_SAVE_ADDR       32
 #define  TEMPLATE_SECTION_SIZE    32
 #define  TEMPLATE_SIZE    				22
-#define  DATADISPLAY_SIZE    			64
+#define  TEMPLATE_ALLOW_NUM   		64
+#define  DATADISPLAY_SIZE    			40
+
+#define  DEFAULT_DATA_SAVE_ADDR   3*1024
+#define  DEFAULT_DATA_COUNT_ADDR  3*1024-2
+
 #define  RS485_COM PAout(11)       
 #define  RS485_REN()	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_11,GPIO_PIN_RESET)
 #define  RS485_TEN()	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_11,GPIO_PIN_SET)
@@ -240,9 +245,11 @@ typedef struct{
 	u8  addr;
 	u8  funcode;
 	u8  template_no;
-	u16  datasize;
+	u8  datasizeH;
+	u8  datasizeL;
   u8  dis_buf[DATADISPLAY_SIZE];
-	u16  crc16_ccitt; 
+	u8  crc16_ccittH; 
+	u8  crc16_ccittL; 
 	u8  frame_end1;
 	u8  frame_end2;	
 }Communation_Rec_DataType;
@@ -256,6 +263,10 @@ typedef union{
 	Communation_Rec_TemplateType rectemplate;
 	u8	rectemplate_buf[22];	
 }COMM_RecTemplate_Union_Type;
+typedef union{
+	Communation_Rec_DataType recdata;
+	u8	recdata_buf[DATADISPLAY_SIZE + 11];	
+}COMM_RecData_Union_Type;
 typedef union{
 	Communation_Rec_Type control;
 	u8	rectemplate_buf[32];	
@@ -348,7 +359,8 @@ extern unsigned short  timeflag;
 extern unsigned short  Menu_Exit_Time;
 extern unsigned long Menu_Valid_Time;
 extern u32 Touch_Contact_Time; 
-extern COMM_RecTemplate_Union_Type Template_Save_buf[DATADISPLAY_SIZE];
+extern COMM_RecTemplate_Union_Type Template_Save_buf[TEMPLATE_ALLOW_NUM];
+extern COMM_RecData_Union_Type      Default_data[TEMPLATE_ALLOW_NUM];
 extern u8 new_display_flag;
 extern u8 new_display_num;
 /*************extern variable end*******************/
@@ -367,6 +379,8 @@ void dispose_menu(void);
 u8  Execute_Host_Comm(void);
 void Communication_Process(void );
 u8 Load_COMM_Template(void);
+u8 Load_COMM_Default(void);
+void Display_Default_Data(void);
 
 void TIM2_Config(void );
 void TIM3_Config(void );

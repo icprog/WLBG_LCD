@@ -4,9 +4,11 @@
 #include "GUI.h"
 
 COMM_RecTemplate_Union_Type  MCU_Host_RecT;//MCU作为主机时的结构体接收应答变量
-COMM_RecTemplate_Union_Type  Template_Save_buf[DATADISPLAY_SIZE];
-COMM_RecControl_Union_Type  MCU_Host_RecC;
-Communation_Rec_DataType  Display_data;
+COMM_RecTemplate_Union_Type  Template_Save_buf[TEMPLATE_ALLOW_NUM];
+COMM_RecControl_Union_Type   MCU_Host_RecC;
+COMM_RecData_Union_Type      Default_data[TEMPLATE_ALLOW_NUM];
+Communation_Rec_DataType     Display_data;
+u8 Ddefault_Data_count;
 u8 new_display_flag;
 u8 new_display_num;
 static u8 slave_rec_state;
@@ -33,9 +35,9 @@ static void Respond_Host_Comm(void)
 		crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);
 		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-3]+\
 			Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-4]*256 == crc)){
-			if(((Usart1_Control_Data.rxbuf[3] == 'T')||((Usart1_Control_Data.rxbuf[3] == 'E')))&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_SECTION_SIZE)){
+			if(((Usart1_Control_Data.rxbuf[3] == 'T')||((Usart1_Control_Data.rxbuf[3] == 'E')))&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_ALLOW_NUM)){
 					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
-							MCU_Host_RecT.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
+// 							MCU_Host_RecT.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
 						  Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
 					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
 					AT24CXX_Write(Usart1_Control_Data.rxbuf[4]*TEMPLATE_SECTION_SIZE + TEMPLATE_SAVE_ADDR,\
@@ -44,6 +46,18 @@ static void Respond_Host_Comm(void)
 						AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR,Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate.template_no);
 						AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR + 1,Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate.template_no);
 					}
+			}else if(((Usart1_Control_Data.rxbuf[3] == 'M')||((Usart1_Control_Data.rxbuf[3] == 'Q')))&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_ALLOW_NUM)){
+					AT24CXX_Write(Usart1_Control_Data.rxbuf[4]*(DATADISPLAY_SIZE+11) + DEFAULT_DATA_SAVE_ADDR,\
+					(unsigned char *)Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count);
+					if(Usart1_Control_Data.rxbuf[3] == 'Q'){
+						AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR,Usart1_Control_Data.rxbuf[4]);
+						AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR + 1,Usart1_Control_Data.rxbuf[4]);
+					}
+					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
+						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
+					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+					new_display_num = Usart1_Control_Data.rxbuf[4];
+					new_display_flag = 1;
 			}else if((Usart1_Control_Data.rxbuf[3] == 'D')&&(Usart1_Control_Data.rxbuf[4] < DATADISPLAY_SIZE)){
 					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
 						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
@@ -56,7 +70,7 @@ static void Respond_Host_Comm(void)
 					}
 			}
 			if(AdrrOK_Flag == 1){//开机地址检查正确和修改地址保存正确后点亮屏幕提示设备OK，当第一次通讯正确后熄灭屏幕显示上位机信息
-				LCD_Clear(BLACK);
+// 				LCD_Clear(BLACK);
 				AdrrOK_Flag = 0;
 			}
 			slave_rec_state = 1;	//从机接收数据正确
@@ -252,6 +266,8 @@ u8  Execute_Host_Comm(void)
 		switch(Usart1_Control_Data.rxbuf[3]){
 			case 'T':
 			case 'E':
+			case 'M':
+			case 'Q':
 				res = 1;
 			break;
 			case 'D':
@@ -262,8 +278,10 @@ u8  Execute_Host_Comm(void)
 					f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
 					word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
 					display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
-					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
-					Show_Str(start_x,start_y,word_size * display_size,(unsigned char*)Display_data.dis_buf,b_color,f_color,word_size,display_mode);
+// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
+					display_mode = Display_data.dis_buf[0];
+					Show_Str(start_x,start_y,word_size/2 * display_size,"                     ",b_color,f_color,word_size,0);
+					Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
 					new_display_flag = 0;
 				}
 			break;
@@ -304,7 +322,7 @@ u8 Load_COMM_Template(void)
 	u16 crc_cal;
 	sum_count1 = AT24CXX_ReadOneByte(TEMPLATE_COUNT_ADDR);
 	sum_count2 = AT24CXX_ReadOneByte(TEMPLATE_COUNT_ADDR + 1);
-	if((sum_count1 == sum_count2)&&(sum_count1 !=0)&&(sum_count1 < DATADISPLAY_SIZE)){
+	if((sum_count1 == sum_count2)&&(sum_count1 !=0)&&(sum_count1 < TEMPLATE_ALLOW_NUM)){
 		for(i= 0;i<= sum_count1;i++){
 			AT24CXX_Read(TEMPLATE_SAVE_ADDR+i*TEMPLATE_SECTION_SIZE,(unsigned char *)Template_Save_buf[i].rectemplate_buf,TEMPLATE_SIZE);
 			crc_cal=CRC_GetCCITT(Template_Save_buf[Usart1_Control_Data.rxbuf[i]].rectemplate_buf,TEMPLATE_SIZE-4);	
@@ -319,6 +337,47 @@ u8 Load_COMM_Template(void)
 		res = False;
 	}
 	return res;
+}
+u8 Load_COMM_Default(void)
+{
+	u8 res,i,sum_count1,sum_count2,def_data_count;
+	u16 crc_cal;
+	sum_count1 = AT24CXX_ReadOneByte(DEFAULT_DATA_COUNT_ADDR);
+	sum_count2 = AT24CXX_ReadOneByte(DEFAULT_DATA_COUNT_ADDR + 1);
+	if((sum_count1 == sum_count2)&&(sum_count1 !=0)&&(sum_count1 < TEMPLATE_ALLOW_NUM)){
+		Ddefault_Data_count = sum_count1;
+		for(i= 0;i<= sum_count1;i++){
+			def_data_count = AT24CXX_ReadOneByte(DEFAULT_DATA_SAVE_ADDR + i*(DATADISPLAY_SIZE+11) + 6) + 11;
+			AT24CXX_Read(DEFAULT_DATA_SAVE_ADDR+i*(DATADISPLAY_SIZE+11),(unsigned char *)Default_data[i].recdata_buf,def_data_count);
+			crc_cal=CRC_GetCCITT(Default_data[i].recdata_buf,def_data_count-4);	
+				if((Default_data[i].recdata_buf[def_data_count-3]+\
+			    Default_data[i].recdata_buf[def_data_count-4]*256 != crc_cal)){
+					res = False;
+					return res;
+				}
+		}
+		res = True;
+	}else{
+		res = False;
+	}
+	return res;
+}
+
+void Display_Default_Data(void)
+{
+	u8 i,word_size,display_size,display_mode;
+	u16 start_x,start_y,b_color,f_color;
+	for(i=0;i<=Ddefault_Data_count;i++){
+		start_x = Template_Save_buf[i].rectemplate.x_starH * 256 + Template_Save_buf[i].rectemplate.x_starL;
+		start_y = Template_Save_buf[i].rectemplate.y_starH * 256 + Template_Save_buf[i].rectemplate.y_starL;
+		b_color = Template_Save_buf[i].rectemplate.backcolorH * 256 + Template_Save_buf[i].rectemplate.backcolorL;
+		f_color = Template_Save_buf[i].rectemplate.fontcolorH * 256 + Template_Save_buf[i].rectemplate.fontcolorL;
+		word_size = Template_Save_buf[i].rectemplate.word_size;
+		display_size = Template_Save_buf[i].rectemplate.display_size; //显示字节个数，一个中文占两个字节
+// 		display_mode = Template_Save_buf[i].rectemplate.display_mode;
+		display_mode = Default_data[i].recdata.dis_buf[0];
+		Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Default_data[i].recdata.dis_buf[1],b_color,f_color,word_size,display_mode);
+	}
 }
 void Communication_Process(void )
 {

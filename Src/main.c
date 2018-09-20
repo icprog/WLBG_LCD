@@ -76,12 +76,13 @@ int main(void)
  	TIM_SetTIM3Compare1(2000);
 // 	MainTask_test();
 // 	GUIDEMO_Main();
+// 	LCD_Clear(LGRAY);
   while (1)
   {
 		dispose_key();
 // 		TPR_Dispaly_Coordinate();
 		if(Key_SetParamFlag == 0){
-		Communication_Process();
+			Communication_Process();
 // 			KeytestTFT();
 		}else{
 			dispose_menu();

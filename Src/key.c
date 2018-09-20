@@ -120,6 +120,8 @@ void dispose_menu(void)
 					slavedisplay[1] = slaveaddrtemp1%100/10 + 0x30;
 					slavedisplay[2] = slaveaddrtemp1%10 + 0x30;
 					slavedisplay[3] = '\0';
+			    Show_Str(32*2,32*2+15,5*32,"+",BLUE,RED,64,1);
+			    Show_Str(32*7,32*2+10,5*32,"-",BLUE,RED,64,1);
 			    Show_Str(32*4,32*3,7*32,(u8 *)slavedisplay,BACK_COLOR,POINT_COLOR,32,0);
 			    Show_Str(32*4,32*5,7*32,(u8 *)slavedisplay,BACK_COLOR,POINT_COLOR,32,0);
 		}else{
@@ -197,6 +199,7 @@ void dispose_menu(void)
 			Show_Str(32*2,32*4,8*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
 			Show_Str(32*2,32*5,8*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
 		}
+		AT24CXX_Init();
 		Menu = MENU_END;
 		break;
 	case MENU_END:Key_SetParamFlag = 0; Menu = MENU_RESERVE;break;
