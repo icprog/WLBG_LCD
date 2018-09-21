@@ -62,6 +62,9 @@ int main(void)
   HAL_Init();
   Stm32_Clock_Init(336,8,2,7);
 	MX_CRC_Init();
+	TIM3_PWM_Init(2000,84-1);    	//42M/42=1M的计数频率，自动重装载为500，那么PWM频率为1M/500=2kHZ
+	USART1_Config();
+ 	TIM_SetTIM3Compare1(2000);
 	ROM_GT30L_Init();
   LCD_Init();
 	LED_GPIO_Config();
@@ -71,9 +74,6 @@ int main(void)
 // 	GUI_Init();
 	TIM2_Config();
 	TIM4_Config();
-	TIM3_PWM_Init(2000,84-1);    	//42M/42=1M的计数频率，自动重装载为500，那么PWM频率为1M/500=2kHZ
-	USART1_Config();
- 	TIM_SetTIM3Compare1(2000);
 // 	MainTask_test();
 // 	GUIDEMO_Main();
 // 	LCD_Clear(LGRAY);
