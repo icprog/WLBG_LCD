@@ -65,8 +65,8 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 #endif
 
 
-#define RxBufMax 512
-#define TxBufMax 512
+#define RxBufMax 512*2
+#define TxBufMax 512*2
 
 /*自动成帧超时定时时间*/
 #define AUTO_FRAME_TIMEOUT1  10  //10*2ms
@@ -84,15 +84,15 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 #define MENU_EXIT_TIME 			4000
 #define MENU_VALID_TIME			12000
 
-#define  TEMPLATE_COUNT_ADDR      30
-#define  TEMPLATE_SAVE_ADDR       32
-#define  TEMPLATE_SECTION_SIZE    32
-#define  TEMPLATE_SIZE    				22
-#define  TEMPLATE_ALLOW_NUM   		64
-#define  DATADISPLAY_SIZE    			40
+#define  TEMPLATE_COUNT_ADDR      30  //模板数量保存起始地址
+#define  TEMPLATE_SAVE_ADDR       32  //模板保存起始地址
+#define  TEMPLATE_SECTION_SIZE    32  //模板一条指令保存的长度间隔，也就是扇区
+#define  TEMPLATE_SIZE    				22  //一条模板指令的长度
+#define  TEMPLATE_ALLOW_NUM   		64  //最大允许模板数
+#define  DATADISPLAY_SIZE    			40  //默认模板数据最大允许数据量，同时也是默认模板数据保存扇区
 
-#define  DEFAULT_DATA_SAVE_ADDR   3*1024
-#define  DEFAULT_DATA_COUNT_ADDR  3*1024-2
+#define  DEFAULT_DATA_SAVE_ADDR   3*1024  //默认模板数据保存起始地址
+#define  DEFAULT_DATA_COUNT_ADDR  3*1024-2 //默认模板数量保存起始地址
 
 #define  RS485_COM PAout(11)       
 #define  RS485_REN()	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_11,GPIO_PIN_RESET)
@@ -363,6 +363,7 @@ extern COMM_RecTemplate_Union_Type Template_Save_buf[TEMPLATE_ALLOW_NUM];
 extern COMM_RecData_Union_Type      Default_data[TEMPLATE_ALLOW_NUM];
 extern u8 new_display_flag;
 extern u8 new_display_num;
+extern u8 Ldisplay_count;
 /*************extern variable end*******************/
 
 /*************function start*******************/

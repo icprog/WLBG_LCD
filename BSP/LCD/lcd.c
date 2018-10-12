@@ -636,11 +636,11 @@ void LCD_Init(void)
  	ParallelPortInit();
 	
 	RST_H;  
-	delay_ms(100);
+	delay_ms(50);
 	RST_L;
-	delay_ms(800);
+	delay_ms(200);
 	RST_H;
-	delay_ms(800); 					// delay 50 ms 
+	delay_ms(50); 					// delay 50 ms 
   lcddev.id=LCD_ReadReg(0x0000);	//读ID（9320/9325/9328/4531/4535等IC）
   lcddev.id= 0xFFFF;
   	if(lcddev.id<0XFF||lcddev.id==0XFFFF||lcddev.id==0X9300)//读到ID不正确,新增lcddev.id==0X9300判断，因为9341在未被复位的情况下会被读成9300

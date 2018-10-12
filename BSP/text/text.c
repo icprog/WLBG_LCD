@@ -122,8 +122,7 @@ void ROM_GT30L_Init(void)
 		
 		ROM_CS_Set();
 		SPI1_Init();		   			        //初始化SPI
-		SPI1_SetSpeed(SPI_BAUDRATEPRESCALER_2); //设置为42M时钟,高速模式
-	  delay_nms(50);
+		SPI1_SetSpeed(SPI_BAUDRATEPRESCALER_8); //设置为42M时钟,高速模式
 #endif
 }
 

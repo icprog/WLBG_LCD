@@ -11,6 +11,7 @@ Communation_Rec_DataType     Display_data;
 u8 Ddefault_Data_count;
 u8 new_display_flag;
 u8 new_display_num;
+u8 Ldisplay_count;
 static u8 slave_rec_state;
 u8 slaveaddr = 3;
 extern UART_HandleTypeDef huart1;
@@ -29,7 +30,7 @@ static void Respond_Host_Comm(void)
 		if(Usart1_Control_Data.rx_count < 8){
 				return;
 		}
-		if((Usart1_Control_Data.rxbuf[2] != slaveaddr)||(Usart1_Control_Data.rxbuf[6] != Usart1_Control_Data.rx_count - 11)){
+		if((Usart1_Control_Data.rxbuf[2] != slaveaddr)||((Usart1_Control_Data.rxbuf[5]*256 + Usart1_Control_Data.rxbuf[6]) != Usart1_Control_Data.rx_count - 11)){
 				return ;
 		}
 		crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);
@@ -58,12 +59,15 @@ static void Respond_Host_Comm(void)
 					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
 					new_display_num = Usart1_Control_Data.rxbuf[4];
 					new_display_flag = 1;
-			}else if((Usart1_Control_Data.rxbuf[3] == 'D')&&(Usart1_Control_Data.rxbuf[4] < DATADISPLAY_SIZE)){
+			}else if((Usart1_Control_Data.rxbuf[3] == 'D')&&(Usart1_Control_Data.rxbuf[4] < TEMPLATE_ALLOW_NUM)){
 					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
 						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
 					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
 					new_display_num = Usart1_Control_Data.rxbuf[4];
 					new_display_flag = 1;
+			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){	
+				Ldisplay_count = Usart1_Control_Data.rxbuf[4];
+				new_display_flag = 1;
 			}else if((Usart1_Control_Data.rxbuf[3] == 'C')){
 					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
 							MCU_Host_RecC.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
@@ -258,9 +262,10 @@ static  u8 func03(u8 x,u8 y,u8 length,u8 *text)
 //=============================================================================
 u8  Execute_Host_Comm(void)
 {
-  u8 res;
+  u8 res,i,j;
 	u8 word_size,display_size,display_mode;
 	u16 start_x,start_y,b_color,f_color;
+	static u16 Ldata_count,Ldata_addr;
 	if(slave_rec_state == 1){//执行主机发送的命令
 // 		switch(MCU_Host_RecT.rectemplate.funcode){
 		switch(Usart1_Control_Data.rxbuf[3]){
@@ -280,11 +285,42 @@ u8  Execute_Host_Comm(void)
 					display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
 // 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
 					display_mode = Display_data.dis_buf[0];
-					Show_Str(start_x,start_y,word_size/2 * display_size,"                     ",b_color,f_color,word_size,0);
+// 					Show_Str(start_x,start_y,word_size/2 * display_size,"                     ",b_color,f_color,word_size,0);
 					Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
 					new_display_flag = 0;
 				}
 			break;
+			case 'L':
+				Ldata_addr = 7;
+				if(new_display_flag == 1){
+					for(i=0;i<Ldisplay_count;i++){
+						  new_display_num = Usart1_Control_Data.rxbuf[Ldata_addr];					
+							start_x = Template_Save_buf[new_display_num].rectemplate.x_starH * 256 + Template_Save_buf[new_display_num].rectemplate.x_starL;
+							start_y = Template_Save_buf[new_display_num].rectemplate.y_starH * 256 + Template_Save_buf[new_display_num].rectemplate.y_starL;
+							b_color = Template_Save_buf[new_display_num].rectemplate.backcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.backcolorL;
+							f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
+							word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
+							display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
+		// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
+							display_mode = Display_data.dis_buf[0];
+						
+						 	Ldata_count = Usart1_Control_Data.rxbuf[2 + Ldata_addr];
+							for(j = 0;j < Ldata_count;j++){
+								Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 3];
+							}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+						  Ldata_addr = Ldata_addr + Ldata_count +3;
+							/**为了减少通讯字节数，每条指令的数量可以取自模板，这样就可以不需要每条指令带数量**/
+// 							Ldata_count = display_size + 1;
+// 							for(j = 0;j < Ldata_count;j++){
+// 								Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 1];
+// 							}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+// 						  Ldata_addr = Ldata_addr + Ldata_count +1;
+
+						  Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
+						}
+					new_display_flag = 0;
+				}
+			break;				
 			case 'C':
 					switch(MCU_Host_RecC.control.funcode){
 							case 0x01:

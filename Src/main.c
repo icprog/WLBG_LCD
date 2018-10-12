@@ -62,15 +62,15 @@ int main(void)
   HAL_Init();
   Stm32_Clock_Init(336,8,2,7);
 	MX_CRC_Init();
-	TIM3_PWM_Init(2000,84-1);    	//42M/42=1M的计数频率，自动重装载为500，那么PWM频率为1M/500=2kHZ
-	USART1_Config();
- 	TIM_SetTIM3Compare1(2000);
+	LED_GPIO_Config();
+	KEY_GPIO_Config();
 	ROM_GT30L_Init();
   LCD_Init();
-	LED_GPIO_Config();
+	TIM3_PWM_Init(2000,84-1);
+	TIM_SetTIM3Compare1(1000);
 	AT24CXX_Init();
-	KEY_GPIO_Config();
 	FT6236_Init();
+	USART1_Config();
 // 	GUI_Init();
 	TIM2_Config();
 	TIM4_Config();
