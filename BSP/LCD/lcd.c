@@ -98,7 +98,7 @@ void LCD_WR_DATA(u16 data)
 //返回值:读到的值
 u16 LCD_RD_DATA(void)
 {
-	 GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitTypeDef GPIO_InitStruct;
 	vu16 ram;			//防止被优化
 //	u8 rdata1,rdata2;
   GPIO_InitStruct.Pin = GPIO_PIN_0 |GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5 |GPIO_PIN_6|GPIO_PIN_7;

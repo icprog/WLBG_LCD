@@ -212,29 +212,11 @@ void AT24CXX_Init(void)
 	  static u8 load_ok_flag = 0;
     I2C_INIT();		 //IIC初始化
     delay_nms(4);
-	  if(True == Load_COMM_Template()){
-			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
-			if(True == Load_COMM_Default()){
-					Show_Str(16,32*3,32*9,"默认数据已正确加载",BACK_COLOR,POINT_COLOR,32,0);
-				  load_ok_flag = 1;
-			}else{
-					Show_Str(16,32*3,32*9,"无默认数据,请下载",BACK_COLOR,POINT_COLOR,32,0);
-			}
-			delay_ms(1500);
-// 			LCD_Clear(LGRAY);
-		}else{
-			Show_Str(32,32*1,8*32,"设备没有可用模板",BACK_COLOR,POINT_COLOR,32,0);
-			Show_Str(16,32*2,9*32,"请先下载模板后使用",BACK_COLOR,POINT_COLOR,32,0);
-			Show_Str(16,32*3,9*32,"最大可设模板数为64",BACK_COLOR,POINT_COLOR,32,0);
-			Show_Str(32,32*4,8*32,"0<=模板编号<=63",BACK_COLOR,POINT_COLOR,32,0);
-			delay_ms(1500);
-			delay_ms(1500);
-// 			LCD_Clear(BLACK);
-		}
+		load_ok_flag = Template_Check_And_Load();
 		if(True == AT24CXX_Check()){
 					addrtemp1 = AT24CXX_ReadOneByte(0x00);
 					addrtemp2 = AT24CXX_ReadOneByte(0x01);
-					if((addrtemp1 == addrtemp2)&&(addrtemp1 < 128)){
+					if((addrtemp1 == addrtemp2)&&(addrtemp1 < 128)&&(addrtemp1 != 0)){
 						slaveaddr = addrtemp1;
 // 						LCD_Clear(BLACK);
 						AdrrOK_Flag = 1;
@@ -243,7 +225,7 @@ void AT24CXX_Init(void)
 						Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
 						Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
 						Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
-						Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*4,7*32,"1<=地址<=127",BACK_COLOR,POINT_COLOR,32,0);
 						slaveaddr = 0;
 						delay_ms(1500);
 						delay_ms(1500);
@@ -253,7 +235,7 @@ void AT24CXX_Init(void)
 						Show_Str(32,32*1,7*32,"请设置设备地址",BACK_COLOR,POINT_COLOR,32,0);
 						Show_Str(32,32*2,7*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
 						Show_Str(32,32*3,7*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
-						Show_Str(32,32*4,7*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
+						Show_Str(32,32*4,7*32,"1<=地址<=127",BACK_COLOR,POINT_COLOR,32,0);
 						slaveaddr = 0;
 						delay_ms(1500);
 						delay_ms(1500);

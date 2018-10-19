@@ -52,7 +52,7 @@ u8 Key_Scan(void)
 	 static u8 longlongkey_flag = 0;
 	  key_num = 0;
 	 //key1
-		if(READ_DEVICE1_KEY1 == READLOW){
+		if((READ_DEVICE1_KEY1 == READLOW)||(READ_DEVICE1_KEY2 == READLOW)){
 			if(longlongkey_flag == 0){
 				if(key1_triggerstate == 0){
 					key1_triggerstate = 1;
@@ -139,14 +139,14 @@ void dispose_menu(void)
 		if((Key_ScanNum > 0)&&(Key_ScanNum != 0xFF)){
 			if(Key_ScanNum == 0x01){
 					slaveaddrtemp1++;
-					if(slaveaddrtemp1 > 50){
+					if(slaveaddrtemp1 > 127){
 						slaveaddrtemp1 = 0;
 					}
 				}else if(Key_ScanNum == 0x11){
 						if(slaveaddrtemp1 > 0){
 							slaveaddrtemp1--;
 						}else{
-							slaveaddrtemp1 = 50;
+							slaveaddrtemp1 = 127;
 						}
 				}
 			slavedisplay[0] = slaveaddrtemp1/100+ 0x30;
@@ -197,7 +197,9 @@ void dispose_menu(void)
 			Show_Str(32*2,32*2,8*32,"地址设置错误",BACK_COLOR,POINT_COLOR,32,0);
 			Show_Str(32*2,32*3,8*32,"当前地址:0",BACK_COLOR,POINT_COLOR,32,0);
 			Show_Str(32*2,32*4,8*32,"该地址设备异常",BACK_COLOR,POINT_COLOR,32,0);
-			Show_Str(32*2,32*5,8*32,"1<=地址<=128",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(32*2,32*5,8*32,"1<=地址<=127",BACK_COLOR,POINT_COLOR,32,0);
+			delay_ms(1500);
+			LCD_Clear(BLACK);
 		}
 		AT24CXX_Init();
 		Menu = MENU_END;

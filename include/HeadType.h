@@ -87,10 +87,11 @@ typedef __I uint8_t vuc8;   /*!< Read Only */
 #define  TEMPLATE_COUNT_ADDR      30  //模板数量保存起始地址
 #define  TEMPLATE_SAVE_ADDR       32  //模板保存起始地址
 #define  TEMPLATE_SECTION_SIZE    32  //模板一条指令保存的长度间隔，也就是扇区
-#define  TEMPLATE_SIZE    				22  //一条模板指令的长度
+#define  TEMPLATE_SIZE    				23  //一条模板指令的长度
 #define  TEMPLATE_ALLOW_NUM   		64  //最大允许模板数
 #define  DATADISPLAY_SIZE    			40  //默认模板数据最大允许数据量，同时也是默认模板数据保存扇区
 
+#define  DEFAULT_DATA_SAVE_SIZE   DATADISPLAY_SIZE+12 //保存在EEPROM的默认数据长度，即扇区
 #define  DEFAULT_DATA_SAVE_ADDR   3*1024  //默认模板数据保存起始地址
 #define  DEFAULT_DATA_COUNT_ADDR  3*1024-2 //默认模板数量保存起始地址
 
@@ -204,6 +205,7 @@ typedef struct{
 	u8  frame_x;
 	u8  addr;
 	u8  funcode;
+	u8  template_sum;
 	u8  template_no;
 	u8  datasizeH;
 	u8  datasizeL;
@@ -244,6 +246,7 @@ typedef struct{
 	u8  frame_x;
 	u8  addr;
 	u8  funcode;
+	u8  template_bare;
 	u8  template_no;
 	u8  datasizeH;
 	u8  datasizeL;
@@ -261,11 +264,11 @@ typedef union{
 
 typedef union{
 	Communation_Rec_TemplateType rectemplate;
-	u8	rectemplate_buf[22];	
+	u8	rectemplate_buf[23];	
 }COMM_RecTemplate_Union_Type;
 typedef union{
 	Communation_Rec_DataType recdata;
-	u8	recdata_buf[DATADISPLAY_SIZE + 11];	
+	u8	recdata_buf[DATADISPLAY_SIZE + 12];	
 }COMM_RecData_Union_Type;
 typedef union{
 	Communation_Rec_Type control;
@@ -364,6 +367,7 @@ extern COMM_RecData_Union_Type      Default_data[TEMPLATE_ALLOW_NUM];
 extern u8 new_display_flag;
 extern u8 new_display_num;
 extern u8 Ldisplay_count;
+extern int Erase_Eeprom_Time;
 /*************extern variable end*******************/
 
 /*************function start*******************/
@@ -382,12 +386,15 @@ void Communication_Process(void );
 u8 Load_COMM_Template(void);
 u8 Load_COMM_Default(void);
 void Display_Default_Data(void);
+u8 Template_Check_And_Load(void);
 
 void TIM2_Config(void );
 void TIM3_Config(void );
 void TIM4_Config(void );
 void TIM3_PWM_Init(u16 arr,u16 psc);
 void TIM_SetTIM3Compare1(u32 compare);
+void Template_bag_compose(Usart_Type usart);
+void Defaultdata_bag_compose(Usart_Type usart);
 /*************function end*******************/
 #endif
 

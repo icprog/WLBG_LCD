@@ -13,8 +13,11 @@ u8 new_display_flag;
 u8 new_display_num;
 u8 Ldisplay_count;
 static u8 slave_rec_state;
-u8 slaveaddr = 3;
+u8 slaveaddr = 0;
 extern UART_HandleTypeDef huart1;
+void Clear_Eeprom_Template_Data(void);
+int Erase_Eeprom_Time = 0;
+u8 Ldata_Svae_buf[15][1024];
 //=============================================================================
 //函数名称:Respond_Host_Comm
 //功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
@@ -24,54 +27,81 @@ extern UART_HandleTypeDef huart1;
 //=============================================================================
 static void Respond_Host_Comm(void)
 {
-		u8 i;
+		u16 i;
 		u16 crc;
 	  u8 res;
 		if(Usart1_Control_Data.rx_count < 8){
 				return;
 		}
-		if((Usart1_Control_Data.rxbuf[2] != slaveaddr)||((Usart1_Control_Data.rxbuf[5]*256 + Usart1_Control_Data.rxbuf[6]) != Usart1_Control_Data.rx_count - 11)){
+		/**主机发送地址0的数据作为群发指令，当指令为模板和默认模板数据时接收，为数据时不接收**/
+		if(((Usart1_Control_Data.rxbuf[2] != 0)&&(Usart1_Control_Data.rxbuf[2] != slaveaddr))||((Usart1_Control_Data.rxbuf[6]*256 + Usart1_Control_Data.rxbuf[7]) != Usart1_Control_Data.rx_count - 12)){
 				return ;
+		}
+		if((Usart1_Control_Data.rxbuf[2] == 0)&&(Usart1_Control_Data.rxbuf[3] == 'D')){
+			  return ;
 		}
 		crc=CRC_GetCCITT(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-4);
 		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-3]+\
 			Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-4]*256 == crc)){
-			if(((Usart1_Control_Data.rxbuf[3] == 'T')||((Usart1_Control_Data.rxbuf[3] == 'E')))&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_ALLOW_NUM)){
+			if((Usart1_Control_Data.rxbuf[3] == 'T')&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_ALLOW_NUM)){
+				if(Usart1_Control_Data.rxbuf[4] == Usart1_Control_Data.rxbuf[5]){//包指令
+						Template_bag_compose(Usart1_Control_Data);
+				}else{//单行指令
 					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
-// 							MCU_Host_RecT.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
-						  Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
-					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
-					AT24CXX_Write(Usart1_Control_Data.rxbuf[4]*TEMPLATE_SECTION_SIZE + TEMPLATE_SAVE_ADDR,\
-					(unsigned char *)Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate_buf,TEMPLATE_SIZE);
-					if(Usart1_Control_Data.rxbuf[3] == 'E'){
-						AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR,Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate.template_no);
-						AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR + 1,Template_Save_buf[Usart1_Control_Data.rxbuf[4]].rectemplate.template_no);
+	// 							MCU_Host_RecT.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
+								Template_Save_buf[Usart1_Control_Data.rxbuf[5]].rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
+						}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+						AT24CXX_Write(Usart1_Control_Data.rxbuf[5]*TEMPLATE_SECTION_SIZE + TEMPLATE_SAVE_ADDR,\
+						(unsigned char *)Template_Save_buf[Usart1_Control_Data.rxbuf[5]].rectemplate_buf,TEMPLATE_SIZE);
+						if((Usart1_Control_Data.rxbuf[4]-1) == Usart1_Control_Data.rxbuf[5]){
+							AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR,Template_Save_buf[Usart1_Control_Data.rxbuf[5]].rectemplate.template_no);
+							AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR + 1,Template_Save_buf[Usart1_Control_Data.rxbuf[5]].rectemplate.template_no);
+						}
 					}
-			}else if(((Usart1_Control_Data.rxbuf[3] == 'M')||((Usart1_Control_Data.rxbuf[3] == 'Q')))&&(Usart1_Control_Data.rxbuf[4]< TEMPLATE_ALLOW_NUM)){
-					AT24CXX_Write(Usart1_Control_Data.rxbuf[4]*(DATADISPLAY_SIZE+11) + DEFAULT_DATA_SAVE_ADDR,\
-					(unsigned char *)Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count);
-					if(Usart1_Control_Data.rxbuf[3] == 'Q'){
-						AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR,Usart1_Control_Data.rxbuf[4]);
-						AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR + 1,Usart1_Control_Data.rxbuf[4]);
+			}else if((Usart1_Control_Data.rxbuf[3] == 'M')&&(Usart1_Control_Data.rxbuf[5]< TEMPLATE_ALLOW_NUM)){
+					if(Usart1_Control_Data.rxbuf[4] == Usart1_Control_Data.rxbuf[5]){//包指令
+						Defaultdata_bag_compose(Usart1_Control_Data);
+					}else{//单行指令
+						AT24CXX_Write(Usart1_Control_Data.rxbuf[5]*(DATADISPLAY_SIZE+12) + DEFAULT_DATA_SAVE_ADDR,\
+						(unsigned char *)Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count);
+						if((Usart1_Control_Data.rxbuf[4]-1) == Usart1_Control_Data.rxbuf[5]){
+							AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR,Usart1_Control_Data.rxbuf[5]);
+							AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR + 1,Usart1_Control_Data.rxbuf[5]);
+						}
+// 					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
+// 						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
+// 					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+// 					new_display_num = Usart1_Control_Data.rxbuf[5];
+				}
+			}else if((Usart1_Control_Data.rxbuf[3] == 'D')&&(Usart1_Control_Data.rxbuf[5] < TEMPLATE_ALLOW_NUM)){
+					if(Usart1_Control_Data.rxbuf[4] == Usart1_Control_Data.rxbuf[5]){//包指令
+						Ldisplay_count = Usart1_Control_Data.rxbuf[5];
+						new_display_flag = 1;				
+					}else{//单行指令
+						for(i = 0;i < Usart1_Control_Data.rxbuf[7];i++){
+								Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 8];
+						}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+						new_display_num = Usart1_Control_Data.rxbuf[5];
+						new_display_flag = 1;
 					}
-					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
-						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
-					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
-					new_display_num = Usart1_Control_Data.rxbuf[4];
-					new_display_flag = 1;
-			}else if((Usart1_Control_Data.rxbuf[3] == 'D')&&(Usart1_Control_Data.rxbuf[4] < TEMPLATE_ALLOW_NUM)){
-					for(i = 0;i < Usart1_Control_Data.rxbuf[6];i++){
-						  Display_data.dis_buf[i] = Usart1_Control_Data.rxbuf[i + 7];
-					}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
-					new_display_num = Usart1_Control_Data.rxbuf[4];
-					new_display_flag = 1;
 			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){	
-				Ldisplay_count = Usart1_Control_Data.rxbuf[4];
-				new_display_flag = 1;
-			}else if((Usart1_Control_Data.rxbuf[3] == 'C')){
-					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
-							MCU_Host_RecC.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
+				Ldisplay_count = Usart1_Control_Data.rxbuf[5];
+				if(Usart1_Control_Data.rxbuf[4]){//需要保存数据
+					for(i=0;i<Usart1_Control_Data.rx_count;i++){
+						Ldata_Svae_buf[(Usart1_Control_Data.rxbuf[4]&0x0F)-1][i] = Usart1_Control_Data.rxbuf[i];
 					}
+					if((Usart1_Control_Data.rxbuf[4]&0x0F)-1 > 0){
+						new_display_flag = 0;
+					}else{
+						new_display_flag = 1;
+					}
+				}else{
+					 new_display_flag = 1;
+				}
+			}else if((Usart1_Control_Data.rxbuf[3] == 'C')){
+// 					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
+// 							MCU_Host_RecC.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
+// 					}
 			}
 			if(AdrrOK_Flag == 1){//开机地址检查正确和修改地址保存正确后点亮屏幕提示设备OK，当第一次通讯正确后熄灭屏幕显示上位机信息
 // 				LCD_Clear(BLACK);
@@ -79,12 +109,15 @@ static void Respond_Host_Comm(void)
 			}
 			slave_rec_state = 1;	//从机接收数据正确
 			res = Execute_Host_Comm();  //执行完动作再回复PC，这样比较慢，但是可以给PC正确状态的答复		
+			if(Usart1_Control_Data.rxbuf[2] == 0){//群发指令不回复
+					return;
+			}
 			RE485_SEND;
 			Usart1_Control_Data.tx_count = 0;	
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_RecT.rectemplate.addr;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_RecT.rectemplate.funcode;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart1_Control_Data.rxbuf[2];
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart1_Control_Data.rxbuf[3];
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = res;	//数据接收正确
@@ -95,12 +128,15 @@ static void Respond_Host_Comm(void)
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0D;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0X0A;
 		}else{	//CRC错误
+			if(Usart1_Control_Data.rxbuf[2] == 0){//群发指令不回复
+					return;
+			}
 			RE485_SEND;
 			Usart1_Control_Data.tx_count = 0;	
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_RecT.rectemplate.addr;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_RecT.rectemplate.funcode;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart1_Control_Data.rxbuf[2];
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Usart1_Control_Data.rxbuf[3];
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;	//数据接收错误
@@ -253,6 +289,7 @@ static  u8 func03(u8 x,u8 y,u8 length,u8 *text)
 	res = 0;
 	return res;
 }
+
 //=============================================================================
 //函数名称:Execute_Host_Comm
 //功能概要:执行上位机发出的命令
@@ -276,22 +313,47 @@ u8  Execute_Host_Comm(void)
 				res = 1;
 			break;
 			case 'D':
-				if(new_display_flag == 1){
-					start_x = Template_Save_buf[new_display_num].rectemplate.x_starH * 256 + Template_Save_buf[new_display_num].rectemplate.x_starL;
-					start_y = Template_Save_buf[new_display_num].rectemplate.y_starH * 256 + Template_Save_buf[new_display_num].rectemplate.y_starL;
-					b_color = Template_Save_buf[new_display_num].rectemplate.backcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.backcolorL;
-					f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
-					word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
-					display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
-// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
-					display_mode = Display_data.dis_buf[0];
-// 					Show_Str(start_x,start_y,word_size/2 * display_size,"                     ",b_color,f_color,word_size,0);
-					Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
-					new_display_flag = 0;
+				if(Usart1_Control_Data.rxbuf[4] == Usart1_Control_Data.rxbuf[5]){//包指令
+					Ldata_addr = 8;
+					if(new_display_flag == 1){
+						for(i=0;i<Ldisplay_count;i++){
+								new_display_num = Usart1_Control_Data.rxbuf[Ldata_addr];
+								start_x = Template_Save_buf[new_display_num].rectemplate.x_starH * 256 + Template_Save_buf[new_display_num].rectemplate.x_starL;
+								start_y = Template_Save_buf[new_display_num].rectemplate.y_starH * 256 + Template_Save_buf[new_display_num].rectemplate.y_starL;
+								b_color = Template_Save_buf[new_display_num].rectemplate.backcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.backcolorL;
+								f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
+								word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
+								display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
+			// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
+								display_mode = Display_data.dis_buf[0];
+								Ldata_count = Usart1_Control_Data.rxbuf[2 + Ldata_addr];
+								for(j = 0;j < Ldata_count;j++){
+									Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 3];
+								}
+								Ldata_addr = Ldata_addr + Ldata_count +3;
+								/**为了减少通讯字节数，每条指令的数量可以取自模板，这样就可以不需要每条指令带数量**/
+								Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
+							}
+						new_display_flag = 0;
+					}					
+				}else{
+					if(new_display_flag == 1){
+						start_x = Template_Save_buf[new_display_num].rectemplate.x_starH * 256 + Template_Save_buf[new_display_num].rectemplate.x_starL;
+						start_y = Template_Save_buf[new_display_num].rectemplate.y_starH * 256 + Template_Save_buf[new_display_num].rectemplate.y_starL;
+						b_color = Template_Save_buf[new_display_num].rectemplate.backcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.backcolorL;
+						f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
+						word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
+						display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
+	// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
+						display_mode = Display_data.dis_buf[0];
+						Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
+						new_display_flag = 0;
+					}
 				}
+				res = 1;
 			break;
 			case 'L':
-				Ldata_addr = 7;
+				Ldata_addr = 8;
 				if(new_display_flag == 1){
 					for(i=0;i<Ldisplay_count;i++){
 						  new_display_num = Usart1_Control_Data.rxbuf[Ldata_addr];					
@@ -320,23 +382,33 @@ u8  Execute_Host_Comm(void)
 						}
 					new_display_flag = 0;
 				}
+				res = 1;
 			break;				
 			case 'C':
-					switch(MCU_Host_RecC.control.funcode){
+					switch(Usart1_Control_Data.rxbuf[5]){
 							case 0x01:
-							res = func01(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
+								  LCD_Clear(BLACK);
+									res = Template_Check_And_Load();
+									LCD_Clear(LGRAY);
+									Display_Default_Data();
 							break;
 							case 0x02:
-								res = func02(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
+								  LCD_Clear(BLACK);
+									Clear_Eeprom_Template_Data();
+							    LCD_Clear(BLACK);
+									Template_Check_And_Load();
+									res = 1;
 							break;
 							case 0x03:
 								res = func03(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 							break;
-	// 		 		case 0x04:
+			 		    case 0x04:							
+							res = func02(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
+							res = func01(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 			// 		  display_bmp(MCU_Host_Rec.control.x,MCU_Host_Rec.control.y,MCU_Host_Rec.control.recbuf[0],MCU_Host_Rec.control.recbuf[1],bmp2);
 						//display_bmp(MCU_Host_Rec.control.x,MCU_Host_Rec.control.y,54,16,bmp3);
 			// 		  res = 1;
-			// 		break;
+					    break;
 						case 0x06:
 									LCD_Clear(BLACK);   //clear all dots 
 									AdrrOK_Flag = 1; //上位机清屏相当于地址标志位正确，点亮屏幕提示，下次通讯时再显示响应信息
@@ -361,9 +433,9 @@ u8 Load_COMM_Template(void)
 	if((sum_count1 == sum_count2)&&(sum_count1 !=0)&&(sum_count1 < TEMPLATE_ALLOW_NUM)){
 		for(i= 0;i<= sum_count1;i++){
 			AT24CXX_Read(TEMPLATE_SAVE_ADDR+i*TEMPLATE_SECTION_SIZE,(unsigned char *)Template_Save_buf[i].rectemplate_buf,TEMPLATE_SIZE);
-			crc_cal=CRC_GetCCITT(Template_Save_buf[Usart1_Control_Data.rxbuf[i]].rectemplate_buf,TEMPLATE_SIZE-4);	
-				if((Template_Save_buf[Usart1_Control_Data.rxbuf[i]].rectemplate_buf[TEMPLATE_SIZE-3]+\
-			    Template_Save_buf[Usart1_Control_Data.rxbuf[i]].rectemplate_buf[TEMPLATE_SIZE-4]*256 != crc_cal)){
+			crc_cal=CRC_GetCCITT(Template_Save_buf[i].rectemplate_buf,TEMPLATE_SIZE-4);	
+				if((Template_Save_buf[i].rectemplate_buf[TEMPLATE_SIZE-3]+\
+			    Template_Save_buf[i].rectemplate_buf[TEMPLATE_SIZE-4]*256 != crc_cal)){
 					res = False;
 					return res;
 				}
@@ -383,8 +455,8 @@ u8 Load_COMM_Default(void)
 	if((sum_count1 == sum_count2)&&(sum_count1 !=0)&&(sum_count1 < TEMPLATE_ALLOW_NUM)){
 		Ddefault_Data_count = sum_count1;
 		for(i= 0;i<= sum_count1;i++){
-			def_data_count = AT24CXX_ReadOneByte(DEFAULT_DATA_SAVE_ADDR + i*(DATADISPLAY_SIZE+11) + 6) + 11;
-			AT24CXX_Read(DEFAULT_DATA_SAVE_ADDR+i*(DATADISPLAY_SIZE+11),(unsigned char *)Default_data[i].recdata_buf,def_data_count);
+			def_data_count = AT24CXX_ReadOneByte(DEFAULT_DATA_SAVE_ADDR + i*(DEFAULT_DATA_SAVE_SIZE) + 7) + 12;
+			AT24CXX_Read(DEFAULT_DATA_SAVE_ADDR+i*(DEFAULT_DATA_SAVE_SIZE),(unsigned char *)Default_data[i].recdata_buf,def_data_count);
 			crc_cal=CRC_GetCCITT(Default_data[i].recdata_buf,def_data_count-4);	
 				if((Default_data[i].recdata_buf[def_data_count-3]+\
 			    Default_data[i].recdata_buf[def_data_count-4]*256 != crc_cal)){
@@ -415,27 +487,149 @@ void Display_Default_Data(void)
 		Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Default_data[i].recdata.dis_buf[1],b_color,f_color,word_size,display_mode);
 	}
 }
+
+void Clear_Eeprom_Template_Data(void)
+{
+	u16 i,j;
+	static u8 display_erasetime[4];
+	/**清除默认模板**/
+	Erase_Eeprom_Time = 0;
+	Show_Str(32,32*2,8*32,"正在擦除EEPROM",BACK_COLOR,POINT_COLOR,32,0);
+	Show_Str(32,32*3,8*32,"请耐心等待....",BACK_COLOR,POINT_COLOR,32,0);
+  for(i=0;i<TEMPLATE_ALLOW_NUM;i++){
+		for(j=0;j<TEMPLATE_SECTION_SIZE;j++){
+			AT24CXX_WriteOneByte(TEMPLATE_SAVE_ADDR + TEMPLATE_SECTION_SIZE*i + j,0xFF);
+		}
+	}
+	AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR,0xFF);
+	AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR + 1,0xFF);
+	/**清除默认模板数据**/
+  for(i=0;i<TEMPLATE_ALLOW_NUM;i++){
+		for(j=0;j<DEFAULT_DATA_SAVE_SIZE;j++){
+			AT24CXX_WriteOneByte(DEFAULT_DATA_SAVE_ADDR + DEFAULT_DATA_SAVE_SIZE*i + j,0xFF);
+		}
+	}
+	AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR,0xFF);
+	AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR + 1,0xFF);
+	Erase_Eeprom_Time = Erase_Eeprom_Time/200;
+	display_erasetime[0] = Erase_Eeprom_Time%100/10 + 0x30;
+	display_erasetime[1] = Erase_Eeprom_Time%10 + 0x30;
+	display_erasetime[2] = 'S';
+	display_erasetime[3] = '\0';
+	Show_Str(32,32*2,8*32,"EEPROM擦除OK  ",BACK_COLOR,POINT_COLOR,32,0);
+	Show_Str(32,32*3,8*32,"用时:         ",BACK_COLOR,POINT_COLOR,32,0);
+	Show_Str(32 + 32*3,32*3,3*32,(u8 *)display_erasetime,BACK_COLOR,POINT_COLOR,32,0);
+	delay_ms(1500);
+}
+u8 Template_Check_And_Load(void)
+{
+	  u8 checkres;
+	  checkres = 0;
+	
+		if(True == Load_COMM_Template()){
+			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+			if(True == Load_COMM_Default()){
+					Show_Str(16,32*3,32*9,"默认数据已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+					checkres = 1;
+			}else{
+					Show_Str(16,32*3,32*9,"无默认数据,请下载",BACK_COLOR,POINT_COLOR,32,0);
+			}
+			delay_ms(1500);
+// 			LCD_Clear(LGRAY);
+		}else{
+			Show_Str(32,32*1,8*32,"设备没有可用模板",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(16,32*2,9*32,"请先下载模板后使用",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(16,32*3,9*32,"最大可设模板数为64",BACK_COLOR,POINT_COLOR,32,0);
+			Show_Str(32,32*4,8*32,"0<=模板编号<=63",BACK_COLOR,POINT_COLOR,32,0);
+			delay_ms(1500);
+			delay_ms(1500);
+// 			LCD_Clear(BLACK);
+		}
+		
+	return checkres;
+}
+
+void Template_bag_compose(Usart_Type usart)
+{
+	  u16 i,j,Taddr,crc16;
+	  Usart_Type* pusart;
+	  u8 tcount,crccount,templatesum = 0;
+	  static COMM_RecTemplate_Union_Type templatedata;
+		static u8 temp;
+	  pusart = &usart;
+		Taddr = 8;
+	  if(pusart->rxbuf[4] != pusart->rxbuf[5]){
+			return;
+		}
+		for(i = 0;i < 5;i++){
+			templatedata.rectemplate_buf[i] = pusart->rxbuf[i];
+		}	
+		templatesum = pusart->rxbuf[4];		
+		for(i=0;i< templatesum;i++){
+			tcount = pusart->rxbuf[2 + Taddr];
+			crccount = 5;
+			for(j = 0;j < tcount+3;j++){
+				temp = pusart->rxbuf[j + Taddr];
+				templatedata.rectemplate_buf[crccount++] = temp;
+			}
+			Taddr = Taddr + tcount +3;
+			if((templatesum - 1) == templatedata.rectemplate.template_no){
+					AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR,templatedata.rectemplate.template_no);
+					AT24CXX_WriteOneByte(TEMPLATE_COUNT_ADDR + 1,templatedata.rectemplate.template_no);
+			}
+			crc16 = CRC_GetCCITT(templatedata.rectemplate_buf,crccount);
+			templatedata.rectemplate_buf[crccount++] = (crc16>>8)&0xFF; 
+			templatedata.rectemplate_buf[crccount++] = crc16&0xFF;
+			templatedata.rectemplate_buf[crccount++] = 0X0D;
+			templatedata.rectemplate_buf[crccount++] = 0X0A;
+			AT24CXX_Write(templatedata.rectemplate.template_no*TEMPLATE_SECTION_SIZE + TEMPLATE_SAVE_ADDR,\
+			(unsigned char *)templatedata.rectemplate_buf,TEMPLATE_SIZE);				
+		}
+}
+void Defaultdata_bag_compose(Usart_Type usart)
+{
+	  u16 i,j,Daddr,crc16;
+	  Usart_Type* pusart;
+	  u8 dcount,crccount,defaultsum = 0;
+	  static COMM_RecData_Union_Type defaultdata;
+		static u8 temp;
+	  pusart = &usart;
+		Daddr = 8;
+	  if(pusart->rxbuf[4] != pusart->rxbuf[5]){
+			return;
+		}
+		for(i = 0;i < 5;i++){
+			defaultdata.recdata_buf[i] = pusart->rxbuf[i];
+		}	
+		defaultsum = pusart->rxbuf[4];		
+		for(i=0;i< defaultsum;i++){
+			dcount = pusart->rxbuf[2 + Daddr];
+			crccount = 5;
+			for(j = 0;j < dcount+3;j++){
+				temp = pusart->rxbuf[j + Daddr];
+				defaultdata.recdata_buf[crccount++] = temp;
+			}
+			Daddr = Daddr + dcount +3;
+			if((defaultsum - 1) == defaultdata.recdata.template_no){
+					AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR,defaultdata.recdata.template_no);
+					AT24CXX_WriteOneByte(DEFAULT_DATA_COUNT_ADDR + 1,defaultdata.recdata.template_no);
+				}
+			crc16 = CRC_GetCCITT(defaultdata.recdata_buf,crccount);
+			defaultdata.recdata_buf[crccount++] = (crc16>>8)&0xFF; 
+			defaultdata.recdata_buf[crccount++] = crc16&0xFF;
+			defaultdata.recdata_buf[crccount++] = 0X0D;
+			defaultdata.recdata_buf[crccount++] = 0X0A;
+			AT24CXX_Write(defaultdata.recdata.template_no*(DATADISPLAY_SIZE+12) + DEFAULT_DATA_SAVE_ADDR,\
+			(unsigned char *)defaultdata.recdata_buf,crccount);			
+		}
+}
 void Communication_Process(void )
 {
 		if (1 == Usart1_Control_Data.rx_aframe){ 
 			Respond_Host_Comm();
 			Usart1_Control_Data.rx_count = 0;
 			Usart1_Control_Data.rx_aframe = 0;
-}
-//		if(Key_ScanNum == 0x01){
-//		func02(0,0,16,"韦乐海茨医药设备");
-//			Key_ScanNum = 0;
-//		}else if(Key_ScanNum == 0x11){
-//			func02(0,1,16,"韦乐海茨医药设备");
-//			Key_ScanNum = 0;
-//		}else if(Key_ScanNum == 0xff){
-//			func02(0,2,16,"韦乐海茨医药设备");
-//			func02(0,3,16,"韦乐海茨医药设备");
-//			Key_ScanNum = 0;
-//		}
-//		delay_ms(1000);
-//		clear_screen();
-//		delay_ms(1000);
+		}
 }
 
 
