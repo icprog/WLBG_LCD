@@ -10,6 +10,7 @@ COMM_RecData_Union_Type      Default_data[TEMPLATE_ALLOW_NUM];
 Communation_Rec_DataType     Display_data;
 u8 Ddefault_Data_count;
 u8 new_display_flag;
+u8 multi_display_flag = 0;
 u8 new_display_num;
 u8 Ldisplay_count;
 static u8 slave_rec_state;
@@ -84,14 +85,17 @@ static void Respond_Host_Comm(void)
 						new_display_num = Usart1_Control_Data.rxbuf[5];
 						new_display_flag = 1;
 					}
-			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){	
+			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){
 				Ldisplay_count = Usart1_Control_Data.rxbuf[5];
 				if(Usart1_Control_Data.rxbuf[4]){//需要保存数据
 					for(i=0;i<Usart1_Control_Data.rx_count;i++){
 						Ldata_Svae_buf[(Usart1_Control_Data.rxbuf[4]&0x0F)-1][i] = Usart1_Control_Data.rxbuf[i];
 					}
 					if((Usart1_Control_Data.rxbuf[4]&0x0F)-1 > 0){
-						new_display_flag = 0;
+						new_display_flag = 0; //保存指令第二条不直接显示，需要客户按键显示
+						if((Usart1_Control_Data.rxbuf[4]&0x0F) ==((Usart1_Control_Data.rxbuf[4]>>4)&0x0F)){
+							multi_display_flag = 1; //保存标准，客户按键之后清除
+						}
 					}else{
 						new_display_flag = 1;
 					}
@@ -99,9 +103,7 @@ static void Respond_Host_Comm(void)
 					 new_display_flag = 1;
 				}
 			}else if((Usart1_Control_Data.rxbuf[3] == 'C')){
-// 					for(i = 0;i < Usart1_Control_Data.rx_count;i++){
-// 							MCU_Host_RecC.rectemplate_buf[i] = Usart1_Control_Data.rxbuf[i];
-// 					}
+
 			}
 			if(AdrrOK_Flag == 1){//开机地址检查正确和修改地址保存正确后点亮屏幕提示设备OK，当第一次通讯正确后熄灭屏幕显示上位机信息
 // 				LCD_Clear(BLACK);
@@ -325,7 +327,7 @@ u8  Execute_Host_Comm(void)
 								word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
 								display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
 			// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
-								display_mode = Display_data.dis_buf[0];
+								display_mode = Usart1_Control_Data.rxbuf[Ldata_addr+3];
 								Ldata_count = Usart1_Control_Data.rxbuf[2 + Ldata_addr];
 								for(j = 0;j < Ldata_count;j++){
 									Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 3];
@@ -369,15 +371,8 @@ u8  Execute_Host_Comm(void)
 						 	Ldata_count = Usart1_Control_Data.rxbuf[2 + Ldata_addr];
 							for(j = 0;j < Ldata_count;j++){
 								Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 3];
-							}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
+							}	
 						  Ldata_addr = Ldata_addr + Ldata_count +3;
-							/**为了减少通讯字节数，每条指令的数量可以取自模板，这样就可以不需要每条指令带数量**/
-// 							Ldata_count = display_size + 1;
-// 							for(j = 0;j < Ldata_count;j++){
-// 								Display_data.dis_buf[j] = Usart1_Control_Data.rxbuf[j + Ldata_addr + 1];
-// 							}//把数据复制给主机通讯结构体,数据正确，先回应主机，记录刷写OLED状态位	
-// 						  Ldata_addr = Ldata_addr + Ldata_count +1;
-
 						  Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
 						}
 					new_display_flag = 0;
@@ -385,7 +380,8 @@ u8  Execute_Host_Comm(void)
 				res = 1;
 			break;				
 			case 'C':
-					switch(Usart1_Control_Data.rxbuf[5]){
+					res = 1;
+					switch(Usart1_Control_Data.rxbuf[4]){
 							case 0x01:
 								  LCD_Clear(BLACK);
 									res = Template_Check_And_Load();
@@ -397,12 +393,28 @@ u8  Execute_Host_Comm(void)
 									Clear_Eeprom_Template_Data();
 							    LCD_Clear(BLACK);
 									Template_Check_And_Load();
-									res = 1;
 							break;
 							case 0x03:
+									if(Usart1_Control_Data.rxbuf[5]&0x01){				
+										RGB_RLED_ON;								
+									}else{
+										RGB_RLED_OFF;
+									}
+									if(Usart1_Control_Data.rxbuf[5]&0x02){
+										RGB_GLED_ON;
+									}else{
+										RGB_GLED_OFF;
+									}
+									if(Usart1_Control_Data.rxbuf[5]&0x04){
+										RGB_BLED_ON;
+									}else{
+										RGB_BLED_OFF;
+									}
+							break;
+							case 0x13:
 								res = func03(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 							break;
-			 		    case 0x04:							
+			 		    case 0x14:							
 							res = func02(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 							res = func01(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 			// 		  display_bmp(MCU_Host_Rec.control.x,MCU_Host_Rec.control.y,MCU_Host_Rec.control.recbuf[0],MCU_Host_Rec.control.recbuf[1],bmp2);
@@ -622,6 +634,50 @@ void Defaultdata_bag_compose(Usart_Type usart)
 			AT24CXX_Write(defaultdata.recdata.template_no*(DATADISPLAY_SIZE+12) + DEFAULT_DATA_SAVE_ADDR,\
 			(unsigned char *)defaultdata.recdata_buf,crccount);			
 		}
+}
+void Display_Multi_Data(u8 loopmode)
+{
+	u8 i,j;
+	u8 word_size,display_size,display_mode,display_sum;
+	u16 start_x,start_y,b_color,f_color;
+	static u16 data_count,data_addr,multi_num,multi_count = 1; 
+	
+	if(multi_display_flag == 0){
+		return;
+	}
+	multi_num = ((Ldata_Svae_buf[0][4]>>4)&0x0F);//找到需要显示的条数
+	if(multi_count < multi_num){
+		multi_count++;
+		data_addr = 8;
+		display_sum = Ldata_Svae_buf[multi_count-1][5];
+		for(i=0;i<display_sum;i++){
+				new_display_num = Ldata_Svae_buf[multi_count-1][data_addr];					
+				start_x = Template_Save_buf[new_display_num].rectemplate.x_starH * 256 + Template_Save_buf[new_display_num].rectemplate.x_starL;
+				start_y = Template_Save_buf[new_display_num].rectemplate.y_starH * 256 + Template_Save_buf[new_display_num].rectemplate.y_starL;
+				b_color = Template_Save_buf[new_display_num].rectemplate.backcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.backcolorL;
+				f_color = Template_Save_buf[new_display_num].rectemplate.fontcolorH * 256 + Template_Save_buf[new_display_num].rectemplate.fontcolorL;
+				word_size = Template_Save_buf[new_display_num].rectemplate.word_size;
+				display_size = Template_Save_buf[new_display_num].rectemplate.display_size; //显示字节个数，一个中文占两个字节
+// 					display_mode = Template_Save_buf[new_display_num].rectemplate.display_mode;
+				display_mode = Ldata_Svae_buf[multi_count-1][data_addr+3];
+			
+				data_count = Ldata_Svae_buf[multi_count-1][2 + data_addr];
+				for(j = 0;j < data_count;j++){
+					Display_data.dis_buf[j] = Ldata_Svae_buf[multi_count-1][j + data_addr + 3];
+				}	
+				data_addr = data_addr + data_count +3;
+				Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
+			}
+	}
+	if(multi_count == multi_num){
+		if(loopmode == 0){
+			multi_display_flag = 0;
+			multi_count = 1;
+		}else{
+			multi_display_flag = 1;
+			multi_count = 0;		
+		}
+	}
 }
 void Communication_Process(void )
 {

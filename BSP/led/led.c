@@ -34,9 +34,12 @@ void LED_GPIO_Config(void)
 	RLED_OFF;
 	Gled_Num = 1;
 	Rled_Num = 0;
-	RGB_GLED_ON;
-	RGB_RLED_ON;
-	RGB_BLED_ON;
+// 	RGB_GLED_ON;
+// 	RGB_RLED_ON;
+// 	RGB_BLED_ON;
+	RGB_GLED_OFF;
+	RGB_RLED_OFF;
+	RGB_BLED_OFF;
 }
 
 //=============================================================================

@@ -82,7 +82,7 @@ void TIM3_PWM_Init(u16 arr,u16 psc)
     HAL_TIM_PWM_Init(&htim3);       //初始化PWM
     
     htim3_CH3.OCMode=TIM_OCMODE_PWM1; //模式选择PWM1
-    htim3_CH3.Pulse=arr/2;            //设置比较值,此值用来确定占空比，默认比较值为自动重装载值的一半,即占空比为50%
+    htim3_CH3.Pulse=0;            //设置比较值,此值用来确定占空比，默认比较值为自动重装载值的一半,即占空比为50%
     htim3_CH3.OCPolarity=TIM_OCPOLARITY_LOW; //输出比较极性为低 
     HAL_TIM_PWM_ConfigChannel(&htim3,&htim3_CH3,TIM_CHANNEL_3);//配置TIM3通道3
 	
@@ -193,7 +193,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	static u8 key = 0;
 	if(htim->Instance==TIM2){
 		Led_Flash();
-		testLED();
+// 		testLED();
 		key=Key_Scan();
 		if(key > 0){
 			if((key == 0xFF)&&(Menu_Valid_Time > 0)){
@@ -224,6 +224,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}else{
 			Menu_Exit_Time = 0;
 	}
+	Erase_Eeprom_Time++;
 	if(TPR_Structure.TouchSta &TP_COORD_UD){		//触摸有按下
 		if((TPR_Structure.TouchKey==0x00)||(TP_LONGLONG_Key == TPR_Structure.TouchKey)){
 			FT6236_Scan();							//读取触摸坐标

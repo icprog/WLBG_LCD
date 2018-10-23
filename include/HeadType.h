@@ -368,6 +368,8 @@ extern u8 new_display_flag;
 extern u8 new_display_num;
 extern u8 Ldisplay_count;
 extern int Erase_Eeprom_Time;
+extern u8 multi_display_flag;
+extern Menu_Option Menu;
 /*************extern variable end*******************/
 
 /*************function start*******************/
@@ -395,6 +397,7 @@ void TIM3_PWM_Init(u16 arr,u16 psc);
 void TIM_SetTIM3Compare1(u32 compare);
 void Template_bag_compose(Usart_Type usart);
 void Defaultdata_bag_compose(Usart_Type usart);
+void Display_Multi_Data(u8 loopmode);
 /*************function end*******************/
 #endif
 

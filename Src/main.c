@@ -87,6 +87,7 @@ int main(void)
 		}else{
 			dispose_menu();
 		}
+		testLED();
 	}
 }
 
@@ -260,6 +261,7 @@ void testLED(void)
 				}
 				Key_ScanNum = 0;
 				TPR_Structure.TouchFlag = 0;
+				Display_Multi_Data(1);
 			}else if(Key_ScanNum == 0x11){
 				testLED--;
 				if(testLED < 0){
@@ -272,48 +274,48 @@ void testLED(void)
 				Key_ScanNum = 0;
 				TPR_Structure.TouchFlag = 0;				
 			}
-			switch(testLED){
-		  case 0:
-					RGB_GLED_OFF;
-					RGB_RLED_OFF;
-					RGB_BLED_OFF;
-				break;
-			case 1:
-					RGB_GLED_ON;
-					RGB_RLED_OFF;
-					RGB_BLED_OFF;
-				break;				
-			case 2:
-					RGB_GLED_OFF;
-					RGB_RLED_ON;
-					RGB_BLED_OFF;
-				break;
-			case 3:
-					RGB_GLED_OFF;
-					RGB_RLED_OFF;
-					RGB_BLED_ON;
-				break;
-			case 4:
-					RGB_GLED_ON;
-					RGB_RLED_ON;
-					RGB_BLED_OFF;
-				break;
-			case 5:
-					RGB_GLED_ON;
-					RGB_RLED_OFF;
-					RGB_BLED_ON;
-				break;
-			case 6:
-					RGB_GLED_OFF;
-					RGB_RLED_ON;
-					RGB_BLED_ON;
-				break;
-			case 7:
-					RGB_GLED_ON;
-					RGB_RLED_ON;
-					RGB_BLED_ON;
-				break;
-		}
+// 			switch(testLED){
+// 		  case 0:
+// 					RGB_GLED_OFF;
+// 					RGB_RLED_OFF;
+// 					RGB_BLED_OFF;
+// 				break;
+// 			case 1:
+// 					RGB_GLED_ON;
+// 					RGB_RLED_OFF;
+// 					RGB_BLED_OFF;
+// 				break;				
+// 			case 2:
+// 					RGB_GLED_OFF;
+// 					RGB_RLED_ON;
+// 					RGB_BLED_OFF;
+// 				break;
+// 			case 3:
+// 					RGB_GLED_OFF;
+// 					RGB_RLED_OFF;
+// 					RGB_BLED_ON;
+// 				break;
+// 			case 4:
+// 					RGB_GLED_ON;
+// 					RGB_RLED_ON;
+// 					RGB_BLED_OFF;
+// 				break;
+// 			case 5:
+// 					RGB_GLED_ON;
+// 					RGB_RLED_OFF;
+// 					RGB_BLED_ON;
+// 				break;
+// 			case 6:
+// 					RGB_GLED_OFF;
+// 					RGB_RLED_ON;
+// 					RGB_BLED_ON;
+// 				break;
+// 			case 7:
+// 					RGB_GLED_ON;
+// 					RGB_RLED_ON;
+// 					RGB_BLED_ON;
+// 				break;
+// 		}
 }
 void KeytestTFT(void)
 {

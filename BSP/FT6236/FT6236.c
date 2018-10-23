@@ -356,10 +356,14 @@ void FT6236_Scan(void)
  		if(TPR_Structure.TouchSta &TP_PRES_DOWN){ 	//之前是被按下的
  			TPR_Structure.TouchSta &= ~0x80;        //触摸松开标记
 			if((Touch_Contact_Time >= TOUCH_SHORT_TIME)&&(Touch_Contact_Time < TOUCH_LONG_TIME)){
-				if((TPR_Structure.y[0]> 60-16)&&(TPR_Structure.y[0] < 120-16)&&(TPR_Structure.x[0]> 90)&&(TPR_Structure.x[0]<130)){
+					if(Menu == MENU_SETPARAM){
+					if((TPR_Structure.y[0]> 60-60)&&(TPR_Structure.y[0] < 120-16)&&(TPR_Structure.x[0]> 90-60)&&(TPR_Structure.x[0]<130+60)){
+						TPR_Structure.TouchKey |= TP_SHORT_Key;
+					}else if((TPR_Structure.y[0]> 180+16)&&(TPR_Structure.y[0] < 240+60)&&(TPR_Structure.x[0]> 90-60)&&(TPR_Structure.x[0]<130+60)){
+						TPR_Structure.TouchKey |= TP_LONG_Key;
+					}
+				}else{
 					TPR_Structure.TouchKey |= TP_SHORT_Key;
-				}else if((TPR_Structure.y[0]> 180+16)&&(TPR_Structure.y[0] < 240+16)&&(TPR_Structure.x[0]> 90)&&(TPR_Structure.x[0]<130)){
-					TPR_Structure.TouchKey |= TP_LONG_Key;
 				}
 			}else if((Touch_Contact_Time >= TOUCH_LONG_TIME)&&(Touch_Contact_Time < TOUCH_LONGLONG_TIME)){
 				TPR_Structure.TouchKey |= TP_LONG_Key;
