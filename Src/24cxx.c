@@ -241,7 +241,7 @@ void AT24CXX_Init(void)
 						delay_ms(1500);
 		}
 		if((load_ok_flag == 1)&&(AdrrOK_Flag == 1)){
-			LCD_Clear(LGRAY);
+			LCD_Clear_Delay(LGRAY);
 			Display_Default_Data();
 			load_ok_flag = 0;
 		}

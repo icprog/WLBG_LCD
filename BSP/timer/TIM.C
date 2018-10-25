@@ -188,6 +188,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   }
 } 
 extern void testLED(void);
+static int LCD_Auto_Switch_Time = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	static u8 key = 0;
@@ -225,6 +226,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			Menu_Exit_Time = 0;
 	}
 	Erase_Eeprom_Time++;
+	if(Auto_Switch_flag == 1){
+		LCD_Auto_Switch_Time++;
+		if((LCD_Auto_Switch_Time >= Atuo_Switch_Time)&&(Menu != MENU_SETPARAM)){
+			LCD_Auto_Switch_Time = 0;
+			Key_ScanNum = 0x01;
+		}
+	}else{
+		LCD_Auto_Switch_Time = 0;
+	}
 	if(TPR_Structure.TouchSta &TP_COORD_UD){		//触摸有按下
 		if((TPR_Structure.TouchKey==0x00)||(TP_LONGLONG_Key == TPR_Structure.TouchKey)){
 			FT6236_Scan();							//读取触摸坐标

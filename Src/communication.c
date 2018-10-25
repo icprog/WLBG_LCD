@@ -11,14 +11,20 @@ Communation_Rec_DataType     Display_data;
 u8 Ddefault_Data_count;
 u8 new_display_flag;
 u8 multi_display_flag = 0;
+u8 Ldata_Follow_flag = 0;
+u8 Auto_Switch_flag = 0;
+int Atuo_Switch_Time;
 u8 new_display_num;
 u8 Ldisplay_count;
+u8 Current_Display_Page = 0;
+u8 Loop_Display_Mode = 0;
 static u8 slave_rec_state;
 u8 slaveaddr = 0;
 extern UART_HandleTypeDef huart1;
 void Clear_Eeprom_Template_Data(void);
 int Erase_Eeprom_Time = 0;
 u8 Ldata_Svae_buf[15][1024];
+u8 Ldata_Follow_Led[15];
 //=============================================================================
 //函数名称:Respond_Host_Comm
 //功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
@@ -85,6 +91,7 @@ static void Respond_Host_Comm(void)
 						new_display_num = Usart1_Control_Data.rxbuf[5];
 						new_display_flag = 1;
 					}
+				multi_display_flag = 0;
 			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){
 				Ldisplay_count = Usart1_Control_Data.rxbuf[5];
 				if(Usart1_Control_Data.rxbuf[4]){//需要保存数据
@@ -94,7 +101,9 @@ static void Respond_Host_Comm(void)
 					if((Usart1_Control_Data.rxbuf[4]&0x0F)-1 > 0){
 						new_display_flag = 0; //保存指令第二条不直接显示，需要客户按键显示
 						if((Usart1_Control_Data.rxbuf[4]&0x0F) ==((Usart1_Control_Data.rxbuf[4]>>4)&0x0F)){
-							multi_display_flag = 1; //保存标准，客户按键之后清除
+							multi_display_flag = 1; //保存标志，客户按键之后清除
+						}else{
+							multi_display_flag = 0;
 						}
 					}else{
 						new_display_flag = 1;
@@ -123,7 +132,7 @@ static void Respond_Host_Comm(void)
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x02;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = res;	//数据接收正确
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Current_Display_Page;
 			crc=CRC_GetCCITT(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = (crc>>8)&0xFF; 
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = crc&0xFF;
@@ -352,6 +361,7 @@ u8  Execute_Host_Comm(void)
 						new_display_flag = 0;
 					}
 				}
+				Current_Display_Page = 0;
 				res = 1;
 			break;
 			case 'L':
@@ -376,6 +386,7 @@ u8  Execute_Host_Comm(void)
 						  Show_Str(start_x,start_y,word_size/2 * display_size,(unsigned char*)&Display_data.dis_buf[1],b_color,f_color,word_size,display_mode);
 						}
 					new_display_flag = 0;
+					Current_Display_Page = 1;
 				}
 				res = 1;
 			break;				
@@ -383,16 +394,20 @@ u8  Execute_Host_Comm(void)
 					res = 1;
 					switch(Usart1_Control_Data.rxbuf[4]){
 							case 0x01:
-								  LCD_Clear(BLACK);
 									res = Template_Check_And_Load();
+									LCD_Clear_Delay(BLACK);
 									LCD_Clear(LGRAY);
 									Display_Default_Data();
+									multi_display_flag = 0;
+									Current_Display_Page = 0;
 							break;
 							case 0x02:
 								  LCD_Clear(BLACK);
 									Clear_Eeprom_Template_Data();
 							    LCD_Clear(BLACK);
 									Template_Check_And_Load();
+									multi_display_flag = 0;
+									Current_Display_Page = 0;
 							break;
 							case 0x03:
 									if(Usart1_Control_Data.rxbuf[5]&0x01){				
@@ -411,6 +426,48 @@ u8  Execute_Host_Comm(void)
 										RGB_BLED_OFF;
 									}
 							break;
+							case 0x04:
+								  if(Usart1_Control_Data.rxbuf[5] == 0x00){
+										Ldata_Follow_flag = 0;
+									}else{
+										Ldata_Follow_flag = 1;
+										for(i=0;i< Usart1_Control_Data.rxbuf[7];i++){
+												Ldata_Follow_Led[i] = Usart1_Control_Data.rxbuf[8+i];
+										}
+										if(Ldata_Follow_Led[0]&0x01){				
+											RGB_RLED_ON;								
+										}else{
+											RGB_RLED_OFF;
+										}
+										if(Ldata_Follow_Led[0]&0x02){
+											RGB_GLED_ON;
+										}else{
+											RGB_GLED_OFF;
+										}
+										if(Ldata_Follow_Led[0]&0x04){
+											RGB_BLED_ON;
+										}else{
+											RGB_BLED_OFF;
+										}
+									}
+							break;	
+							case 0x05:
+								  if(Usart1_Control_Data.rxbuf[5] == 0x00){
+										Auto_Switch_flag = 0;
+									}else{
+										Auto_Switch_flag = 1;
+										Atuo_Switch_Time = Usart1_Control_Data.rxbuf[8]*256 + Usart1_Control_Data.rxbuf[9];
+									}
+							break;
+							case 0x06:
+								  if(Usart1_Control_Data.rxbuf[5] == 0x00){
+										Loop_Display_Mode = 0;
+									}else{
+										Loop_Display_Mode = 1;
+									}
+							break;
+							case 0x10:
+							break;									
 							case 0x13:
 								res = func03(MCU_Host_RecC.control.x,MCU_Host_RecC.control.y,(u8)(MCU_Host_RecC.control.datasizeL-2),&MCU_Host_RecC.control.recbuf[0]);
 							break;
@@ -421,12 +478,12 @@ u8  Execute_Host_Comm(void)
 						//display_bmp(MCU_Host_Rec.control.x,MCU_Host_Rec.control.y,54,16,bmp3);
 			// 		  res = 1;
 					    break;
-						case 0x06:
+						case 0x15:
 									LCD_Clear(BLACK);   //clear all dots 
 									AdrrOK_Flag = 1; //上位机清屏相当于地址标志位正确，点亮屏幕提示，下次通讯时再显示响应信息
 									res = 1;
 									break;
-						case 0x07:res = 2;break;			
+						case 0x16:res = 2;break;			
 						default: res = 2;break;
 					}
 					break;
@@ -539,14 +596,14 @@ u8 Template_Check_And_Load(void)
 	  checkres = 0;
 	
 		if(True == Load_COMM_Template()){
-			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+// 			Show_Str(32+16,32*2,32*7,"模板已正确加载",BACK_COLOR,POINT_COLOR,32,0);
 			if(True == Load_COMM_Default()){
-					Show_Str(16,32*3,32*9,"默认数据已正确加载",BACK_COLOR,POINT_COLOR,32,0);
+// 					Show_Str(16,32*3,32*9,"默认数据已正确加载",BACK_COLOR,POINT_COLOR,32,0);
 					checkres = 1;
 			}else{
 					Show_Str(16,32*3,32*9,"无默认数据,请下载",BACK_COLOR,POINT_COLOR,32,0);
+					delay_ms(1500);
 			}
-			delay_ms(1500);
 // 			LCD_Clear(LGRAY);
 		}else{
 			Show_Str(32,32*1,8*32,"设备没有可用模板",BACK_COLOR,POINT_COLOR,32,0);
@@ -647,7 +704,25 @@ void Display_Multi_Data(u8 loopmode)
 	}
 	multi_num = ((Ldata_Svae_buf[0][4]>>4)&0x0F);//找到需要显示的条数
 	if(multi_count < multi_num){
+		if(Ldata_Follow_flag){
+			if(Ldata_Follow_Led[multi_count]&0x01){				
+				RGB_RLED_ON;								
+			}else{
+				RGB_RLED_OFF;
+			}
+			if(Ldata_Follow_Led[multi_count]&0x02){
+				RGB_GLED_ON;
+			}else{
+				RGB_GLED_OFF;
+			}
+			if(Ldata_Follow_Led[multi_count]&0x04){
+				RGB_BLED_ON;
+			}else{
+				RGB_BLED_OFF;
+			}
+		}
 		multi_count++;
+		Current_Display_Page = multi_count;
 		data_addr = 8;
 		display_sum = Ldata_Svae_buf[multi_count-1][5];
 		for(i=0;i<display_sum;i++){

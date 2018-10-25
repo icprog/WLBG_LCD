@@ -2634,7 +2634,32 @@ void LCD_Clear(u16 color)
 //		LCD->LCD_RAM=color;	
 		LCD_WriteRAM(color);
 	}
-}  
+}
+//清屏函数
+//color:要清屏的填充色
+void LCD_Clear_Delay(u16 color)
+{
+	u32 index=0;      
+	u32 totalpoint=lcddev.width;
+	totalpoint*=lcddev.height; 			//得到总点数
+	if((lcddev.id==0X6804)&&(lcddev.dir==1))//6804横屏的时候特殊处理  
+	{						    
+ 		lcddev.dir=0;	 
+ 		lcddev.setxcmd=0X2A;
+		lcddev.setycmd=0X2B;  	 			
+		LCD_SetCursor(0x00,0x0000);		//设置光标位置  
+ 		lcddev.dir=1;	 
+  		lcddev.setxcmd=0X2B;
+		lcddev.setycmd=0X2A;  	 
+ 	}else LCD_SetCursor(0x00,0x0000);	//设置光标位置 
+	LCD_WriteRAM_Prepare();     		//开始写入GRAM	 	  
+	for(index=0;index<totalpoint;index++)
+	{
+//		LCD->LCD_RAM=color;	
+		LCD_WriteRAM(color);
+		delay_us(50);
+	}
+} 
 //在指定区域内填充单个颜色
 //(sx,sy),(ex,ey):填充矩形对角坐标,区域大小为:(ex-sx+1)*(ey-sy+1)   
 //color:要填充的颜色

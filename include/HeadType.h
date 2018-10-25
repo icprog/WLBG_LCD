@@ -370,6 +370,11 @@ extern u8 Ldisplay_count;
 extern int Erase_Eeprom_Time;
 extern u8 multi_display_flag;
 extern Menu_Option Menu;
+extern u8 Ldata_Follow_flag;
+extern u8 Auto_Switch_flag;
+extern int Atuo_Switch_Time;
+extern u8 Current_Display_Page;
+extern u8 Loop_Display_Mode;
 /*************extern variable end*******************/
 
 /*************function start*******************/

@@ -261,7 +261,7 @@ void testLED(void)
 				}
 				Key_ScanNum = 0;
 				TPR_Structure.TouchFlag = 0;
-				Display_Multi_Data(1);
+				Display_Multi_Data(Loop_Display_Mode);
 			}else if(Key_ScanNum == 0x11){
 				testLED--;
 				if(testLED < 0){
