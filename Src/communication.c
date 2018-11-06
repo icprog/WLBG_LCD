@@ -92,7 +92,7 @@ static void Respond_Host_Comm(void)
 						new_display_flag = 1;
 					}
 				multi_display_flag = 0;
-			}else if((Usart1_Control_Data.rxbuf[3] == 'L')){
+			}else if((Usart1_Control_Data.rxbuf[3] == 'S')){
 				Ldisplay_count = Usart1_Control_Data.rxbuf[5];
 				if(Usart1_Control_Data.rxbuf[4]){//需要保存数据
 					for(i=0;i<Usart1_Control_Data.rx_count;i++){
@@ -364,7 +364,7 @@ u8  Execute_Host_Comm(void)
 				Current_Display_Page = 0;
 				res = 1;
 			break;
-			case 'L':
+			case 'S':
 				Ldata_addr = 8;
 				if(new_display_flag == 1){
 					for(i=0;i<Ldisplay_count;i++){
